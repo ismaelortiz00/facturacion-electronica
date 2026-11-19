@@ -1,0 +1,70 @@
+{% extends 'facturacion/base.html' %}
+{% load formato l10n %}
+{% block titulo %}{% if tipo == 'nota_credito' %}Nota de crédito{% else %}Factura{% endif %}{% endblock %}
+{% block contenido %}
+<div class="cabecera"><div>
+    <h1>{% if comp %}Editar borrador{% elif tipo == 'nota_credito' %}Nueva nota de crédito{% else %}Nueva factura{% endif %}</h1>
+    <p class="sub">{% if tipo == 'nota_credito' %}Devuelve dinero o corrige una factura. Usa el mismo IVA con que se facturó.{% else %}Elige el cliente y los servicios. El IVA se pone solo según la fecha: si es feriado con decreto, los servicios turísticos llevan el IVA reducido.{% endif %}</p>
+</div></div>
+{{ tasas|json_script:"tasasIva" }}
+<form method="post" class="tarjeta-panel formulario" id="formFactura" data-tipo="{{ tipo }}">
+    {% csrf_token %}
+    <input type="hidden" name="tipo" value="{{ tipo }}">
+    <div id="avisoIva" class="aviso-iva" hidden></div>
+    <div class="rejilla-2">
+        <label>Cliente
+            <select name="cliente_id" class="entrada" required data-buscar>
+                <option value="">Elige el cliente…</option>
+                {% for c in clientes %}<option value="{{ c.pk }}" {% if cliente_inicial == c.pk|stringformat:'s' %}selected{% endif %}>{{ c.nombre }} · {{ c.identificacion }}</option>{% endfor %}
+            </select>
+            <small class="tenue">¿No está? <a class="enlace" href="{% url 'facturacion:cliente_nuevo' %}?volver={% url 'facturacion:factura_nueva' %}">Regístralo aquí</a>.</small>
+        </label>
+        <label>Fecha <input type="date" name="fecha" class="entrada" required value="{{ v.fecha }}"></label>
+        {% if tipo == 'nota_credito' %}
+        <label>Factura que se modifica
+            <select name="modifica_id" class="entrada" required data-buscar>
+                <option value="">Elige la factura…</option>
+                {% for f in facturas %}<option value="{{ f.pk }}" {% if modifica.pk == f.pk %}selected{% endif %}>{{ f.numero }} · {{ f.cliente.nombre }} · {{ f.total|dinero }}</option>{% endfor %}
+            </select></label>
+        <label>Motivo <input name="motivo" class="entrada" maxlength="300" required autocomplete="off" placeholder="Ej. Cancelación de 1 noche" value="{{ v.motivo }}"></label>
+        {% else %}
+        <label>Forma de pago
+            <select name="forma_pago" class="entrada">{% for valor, t in formas %}<option value="{{ valor }}" {% if v.forma_pago == valor %}selected{% endif %}>{{ t }}</option>{% endfor %}</select></label>
+        <label id="campoPlazo">Plazo para pagar (días) <input type="number" name="plazo_dias" min="1" max="365" class="entrada" value="{{ v.plazo_dias }}"></label>
+        {% endif %}
+        <label>Observación (sale en la factura) <input name="observacion" class="entrada" maxlength="300" value="{{ v.observacion }}" placeholder="Ej. Reserva 245 · Habitación 12"></label>
+    </div>
+
+    <table class="tabla tabla-lineas">
+        <thead><tr><th>Servicio</th><th>Descripción</th><th class="num">Cantidad</th><th class="num">Precio</th><th class="num">Descuento</th><th>IVA</th><th class="num">Subtotal</th><th></th></tr></thead>
+        <tbody>
+        {% for l in lineas %}
+            <tr class="linea" {% if tipo == 'nota_credito' and l %}data-pct="{{ l.porcentaje_iva|unlocalize }}"{% endif %}>
+                <td><select name="servicio_id" class="entrada" data-buscar aria-label="Servicio">
+                    <option value="">Elige…</option>
+                    {% for s in servicios %}<option value="{{ s.pk }}" data-precio="{{ s.precio|unlocalize }}" data-nombre="{{ s.nombre }}" data-tarifa="{{ s.tarifa_iva }}" data-tarifa-texto="{{ s.get_tarifa_iva_display }}" data-turistico="{% if s.turistico %}1{% endif %}" {% if l.servicio_id == s.pk %}selected{% endif %}>{{ s.codigo }} · {{ s.nombre }}{% if s.turistico %} ✦{% endif %}</option>{% endfor %}
+                </select></td>
+                <td><input name="descripcion" class="entrada" maxlength="300" value="{{ l.descripcion }}"></td>
+                <td><input name="cantidad" class="entrada num" inputmode="decimal" value="{% if l and l.cantidad != '' %}{{ l.cantidad|entrada }}{% endif %}"></td>
+                <td><input name="precio" class="entrada num" inputmode="decimal" value="{% if l and l.precio != '' %}{{ l.precio|entrada }}{% endif %}"></td>
+                <td><input name="descuento" class="entrada num" inputmode="decimal" value="{% if l and l.descuento %}{{ l.descuento|entrada }}{% endif %}"></td>
+                <td class="col-iva" data-iva-linea>—</td>
+                <td class="num" data-subtotal>0.00</td>
+                <td><button type="button" class="quitar" aria-label="Quitar línea" data-quitar>×</button></td>
+            </tr>
+        {% endfor %}
+        </tbody>
+        <tfoot>
+            <tr><td><button type="button" class="btn btn-secundario btn-chico" data-agregar>+ Agregar servicio</button></td>
+                <td colspan="5" class="num">Subtotal sin IVA</td><td class="num" data-base>0.00</td><td></td></tr>
+            <tr><td class="tenue">✦ = servicio turístico</td><td colspan="5" class="num">IVA</td><td class="num" data-iva>0.00</td><td></td></tr>
+            <tr><td></td><td colspan="5" class="num fuerte">Total</td><td class="num fuerte total-grande" data-total>0.00</td><td></td></tr>
+        </tfoot>
+    </table>
+    <div class="acciones">
+        <a href="{% if comp %}{% url 'facturacion:factura' comp.pk %}{% else %}{% url 'facturacion:facturas' %}{% endif %}" class="btn btn-secundario">Cancelar</a>
+        <button type="submit" name="accion" value="borrador" class="btn btn-secundario">Guardar borrador</button>
+        <button type="submit" name="accion" value="emitir" class="btn btn-verde">Emitir y enviar al SRI</button>
+    </div>
+</form>
+{% endblock %}

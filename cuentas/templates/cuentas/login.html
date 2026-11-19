@@ -1,0 +1,32 @@
+{% extends 'cuentas/base.html' %}
+{% block titulo %}Iniciar sesión{% endblock %}
+{% block subtitulo %}Ingresa con tu cédula o correo verificado{% endblock %}
+
+{% block contenido %}
+{% if aviso %}<div class="mensaje info">{{ aviso }}</div>{% endif %}
+<div class="mensaje" id="mensaje" role="alert" hidden></div>
+
+<form id="formLogin" action="{% url 'validar_login' %}" method="post" data-ajax novalidate>
+    {% csrf_token %}
+    <label for="usuario">Cédula o correo electrónico</label>
+    <input type="text" id="usuario" name="usuario" maxlength="150" autocomplete="username"
+           placeholder="0912345678 o tu@correo.com" required data-usuario>
+    <small class="ayuda" id="ayudaUsuario"></small>
+
+    <label for="clave">Contraseña</label>
+    <div class="campo-clave">
+        <input type="password" id="clave" name="clave" maxlength="128" autocomplete="current-password" required>
+        <button type="button" class="ver-clave" data-ver="clave" aria-label="Mostrar contraseña">Ver</button>
+    </div>
+
+    {% include 'cuentas/_captcha.html' %}
+
+    <button type="submit" class="btn btn-principal">Ingresar</button>
+</form>
+
+<nav class="enlaces">
+    <a href="{% url 'registro' %}">Crear una cuenta</a>
+    <a href="{% url 'reenviar_verificacion' %}">Verificar mi correo</a>
+</nav>
+<p class="nota">Tras {{ max_intentos }} contraseñas incorrectas la cuenta se bloquea {{ minutos_bloqueo }} minutos.</p>
+{% endblock %}

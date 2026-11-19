@@ -1,0 +1,9 @@
+{% load formato %}
+<svg viewBox="0 0 640 210" role="img" aria-label="Ventas por día; en otro color los días de feriado con IVA reducido">
+    {% for g in grafico.grilla %}<line class="grilla" x1="{{ grafico.izq }}" x2="{{ grafico.der }}" y1="{{ g.y }}" y2="{{ g.y }}"/><text class="eje" x="{{ grafico.izq|add:-6 }}" y="{{ g.y }}" text-anchor="end" dominant-baseline="middle">{{ g.texto }}</text>{% endfor %}
+    {% for b in grafico.barras %}
+        <rect class="barra-dia {{ b.clase }}" x="{{ b.x }}" y="{{ b.y }}" width="{{ b.ancho }}" height="{{ b.alto }}" rx="2"><title>{{ b.fecha|date:'d/m/Y' }}: ${{ b.total|floatformat:'2u' }}{% if b.feriado %} · feriado {{ b.feriado }}{% endif %}</title></rect>
+        {% if b.etiqueta %}<text class="eje" x="{{ b.cx }}" y="{{ grafico.eje_y }}" text-anchor="middle">{{ b.etiqueta }}</text>{% endif %}
+    {% endfor %}
+    <line class="grilla" x1="{{ grafico.izq }}" x2="{{ grafico.der }}" y1="{{ grafico.base }}" y2="{{ grafico.base }}"/>
+</svg>

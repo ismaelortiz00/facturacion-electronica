@@ -1,0 +1,38 @@
+{% load formato %}<div class="ia-chat" data-ia-url="{% url 'asistente:mensaje' %}" data-ia-historial="{% url 'asistente:historial' %}">
+    <header class="ia-cabeza">
+        <div class="ia-marca"><span class="ia-chispa" aria-hidden="true">✦</span> Asistente IK <span class="ia-modo" data-ia-modo></span></div>
+        <div class="ia-cabeza-botones">
+            <button type="button" class="ia-icono" data-ia-limpiar title="Nueva conversación" aria-label="Nueva conversación">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
+            <button type="button" class="ia-icono ia-solo-panel" data-ia-cerrar title="Cerrar" aria-label="Cerrar">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+        </div>
+    </header>
+
+    <div class="ia-cuerpo" data-ia-cuerpo>
+        <section class="ia-bienvenida" data-ia-bienvenida>
+            <h2 class="ia-saludo"><span>Hola, {{ user.nombres|primer_nombre }}</span></h2>
+            <p class="ia-pregunta">¿En qué te ayudo hoy?</p>
+            <div class="ia-tarjetas" data-ia-sugerencias>
+                <button type="button" data-rellenar="Factura para ">
+                    <span>Prepara una factura por mí</span><small>escribe el cliente y los servicios</small><i aria-hidden="true">🧾</i></button>
+                <button type="button" data-texto="¿Qué IVA rige hoy y cuándo es el próximo feriado?">
+                    <span>¿Qué IVA rige hoy?</span><small>y cuándo es el próximo feriado</small><i aria-hidden="true">🏖️</i></button>
+                <button type="button" data-texto="¿Cuánto vendí este mes?">
+                    <span>¿Cuánto vendí este mes?</span><small>con lo facturado en feriados</small><i aria-hidden="true">📈</i></button>
+                <button type="button" data-texto="¿Quién me debe?">
+                    <span>¿Quién me debe?</span><small>clientes con facturas pendientes</small><i aria-hidden="true">💳</i></button>
+            </div>
+        </section>
+        <div class="ia-mensajes" data-ia-mensajes aria-live="polite"></div>
+    </div>
+
+    <form class="ia-form" data-ia-form>
+        <div class="ia-caja">
+            <textarea name="texto" rows="1" placeholder="Pregúntale al asistente" maxlength="2000" required aria-label="Escribe tu pregunta"></textarea>
+            <button type="submit" class="ia-enviar" aria-label="Enviar" disabled>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h13M13 6l6 6-6 6"/></svg></button>
+        </div>
+        <p class="ia-nota">La IA consulta tus datos reales y deja las facturas en borrador: tú decides si se emiten.</p>
+    </form>
+</div>

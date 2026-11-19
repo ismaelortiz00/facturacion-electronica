@@ -1,0 +1,26 @@
+{% extends 'cuentas/base.html' %}
+{% block titulo %}Verificar correo{% endblock %}
+{% block encabezado %}Verificar correo{% endblock %}
+{% block subtitulo %}Te enviaremos un código de 6 dígitos{% endblock %}
+
+{% block contenido %}
+<div class="mensaje" id="mensaje" role="alert" hidden></div>
+
+<div id="pasoFormulario">
+<form id="formReenvio" action="{% url 'reenviar_verificacion' %}" method="post" data-ajax data-limpiar data-paso-codigo novalidate>
+    {% csrf_token %}
+    <label for="correo">Correo electrónico registrado</label>
+    <input type="email" id="correo" name="correo" maxlength="150" autocomplete="email" required>
+
+    {% include 'cuentas/_captcha.html' %}
+
+    <button type="submit" class="btn btn-principal">Enviar código</button>
+</form>
+
+<nav class="enlaces">
+    <a href="{% url 'login' %}">Volver al inicio de sesión</a>
+</nav>
+</div>
+
+{% include 'cuentas/_paso_codigo.html' %}
+{% endblock %}

@@ -1,0 +1,25 @@
+{% extends 'facturacion/base.html' %}
+{% load formato %}
+{% block titulo %}Servicios{% endblock %}
+{% block contenido %}
+<div class="cabecera">
+    <div><h1>Servicios</h1><p class="sub">Los marcados como turísticos pagan el IVA reducido en los feriados con decreto. La columna «IVA hoy» muestra lo que se cobraría si facturas hoy.</p></div>
+    {% if empleado.es_admin %}<a href="{% url 'facturacion:servicio_nuevo' %}" class="btn btn-verde">+ Nuevo servicio</a>{% endif %}
+</div>
+<form method="get" class="filtros"><input type="search" name="q" value="{{ q }}" placeholder="Nombre o código" class="entrada entrada-ancha"><button class="btn btn-verde">Buscar</button></form>
+<section class="tarjeta-panel sin-relleno">
+<table class="tabla">
+    <thead><tr><th>Código</th><th>Servicio</th><th>Categoría</th><th>Turístico</th><th class="num">Precio sin IVA</th><th class="num">IVA hoy</th></tr></thead>
+    <tbody>
+    {% for f in filas %}
+        <tr {% if empleado.es_admin %}data-href="{% url 'facturacion:servicio_editar' f.s.pk %}"{% endif %} class="{% if not f.s.activo %}fila-inactiva{% endif %}">
+            <td class="mono">{{ f.s.codigo }}</td><td>{{ f.s.nombre }}</td><td>{{ f.s.get_categoria_display }}</td>
+            <td>{% if f.s.turistico %}<span class="etiqueta etiqueta-verde">Sí</span>{% else %}<span class="etiqueta etiqueta-gris">No</span>{% endif %}</td>
+            <td class="num">{{ f.s.precio|precio }}</td>
+            <td class="num {% if estado.decreto and f.s.turistico and f.s.tarifa_iva == 'general' %}iva-reducido{% endif %}">{{ f.iva_hoy|pct }} %</td>
+        </tr>
+    {% empty %}<tr><td colspan="6" class="vacio">Registra tus servicios: habitaciones, tours, platos, transporte…</td></tr>{% endfor %}
+    </tbody>
+</table>
+</section>
+{% endblock %}

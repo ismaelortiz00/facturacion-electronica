@@ -1,0 +1,84 @@
+{% extends 'facturacion/base.html' %}
+{% load formato %}
+{% block titulo %}{{ comp }}{% endblock %}
+{% block contenido %}
+<div class="cabecera">
+    <div>
+        <h1>{{ comp.get_tipo_display }} {{ comp.numero|default:'(borrador)' }}
+            <span class="etiqueta {% if comp.estado == 'emitido' %}etiqueta-verde{% elif comp.estado == 'anulado' %}etiqueta-roja{% else %}etiqueta-ambar{% endif %}">{{ comp.get_estado_display }}</span>
+            {% if comp.origen == 'ia' %}<span class="etiqueta etiqueta-gris" title="La preparó el asistente de IA">✦ preparada por IA</span>{% endif %}</h1>
+        <p class="sub">{{ comp.fecha|date:'d/m/Y' }} · {{ comp.cliente.nombre }} ({{ comp.cliente.identificacion }}) · {{ comp.get_forma_pago_display }}{% if comp.vencimiento %} · vence {{ comp.vencimiento|date:'d/m/Y' }}{% endif %}</p>
+    </div>
+    <a href="{% url 'facturacion:facturas' %}" class="btn btn-secundario">Volver</a>
+</div>
+{% if comp.decreto %}<div class="aviso-iva feriado">IVA reducido aplicado: <strong>{{ comp.decreto.porcentaje|pct }} %</strong> para servicios turísticos por {{ comp.decreto.feriado }} ({{ comp.decreto.decreto }}, del {{ comp.decreto.desde|date:'d/m' }} al {{ comp.decreto.hasta|date:'d/m/Y' }}).</div>{% endif %}
+{% if comp.modifica %}<div class="mensaje info">Modifica la <a class="enlace" href="{% url 'facturacion:factura' comp.modifica.pk %}">factura {{ comp.modifica.numero }}</a>. Motivo: {{ comp.motivo }}</div>{% endif %}
+{% if comp.estado == 'anulado' %}<div class="mensaje error">Anulada: {{ comp.motivo_anulacion }}</div>{% endif %}
+
+<section class="tarjeta-panel sin-relleno">
+<table class="tabla">
+    <thead><tr><th>Servicio</th><th class="num">Cantidad</th><th class="num">Precio</th><th class="num">Descuento</th><th>IVA y por qué</th><th class="num">Subtotal</th></tr></thead>
+    <tbody>
+    {% for l in lineas %}
+        <tr><td>{{ l.descripcion }}<small class="tenue bloque">{{ l.servicio.codigo }}</small></td><td class="num">{{ l.cantidad|entrada }}</td>
+            <td class="num">{{ l.precio|precio }}</td><td class="num">{{ l.descuento|dinero }}</td>
+            <td class="{% if l.decreto %}iva-reducido{% endif %}">{{ l.porcentaje_iva|pct }} % <small class="tenue bloque">{{ l.motivo_iva }}</small></td>
+            <td class="num">{{ l.subtotal|dinero0 }}</td></tr>
+    {% endfor %}
+    </tbody>
+    <tfoot>
+        {% if comp.base_general %}<tr><td colspan="5" class="num">Subtotal tarifa general</td><td class="num">{{ comp.base_general|dinero0 }}</td></tr>{% endif %}
+        {% if comp.base_reducida %}<tr><td colspan="5" class="num iva-reducido">Subtotal IVA reducido (feriado)</td><td class="num">{{ comp.base_reducida|dinero0 }}</td></tr>{% endif %}
+        {% if comp.base_cero %}<tr><td colspan="5" class="num">Subtotal 0 %</td><td class="num">{{ comp.base_cero|dinero0 }}</td></tr>{% endif %}
+        <tr><td colspan="5" class="num">IVA</td><td class="num">{{ comp.iva|dinero0 }}</td></tr>
+        <tr><td colspan="5" class="num fuerte">Total</td><td class="num fuerte total-grande">{{ comp.total|dinero0 }}</td></tr>
+    </tfoot>
+</table>
+</section>
+
+<div class="tarjetas-dos">
+<section class="tarjeta-panel">
+    <h2>Factura electrónica (SRI)</h2>
+    {% if ce %}
+        <p><span class="etiqueta {% if ce.estado == 'autorizado' %}etiqueta-verde{% elif ce.estado == 'devuelto' or ce.estado == 'no_autorizado' %}etiqueta-roja{% else %}etiqueta-ambar{% endif %}">{{ ce.get_estado_display }}</span>
+           {% if ce.correo_enviado %}<span class="etiqueta etiqueta-gris">enviada al correo del cliente</span>{% endif %}</p>
+        <p class="mono tenue">{{ ce.clave_acceso }}</p>
+        {% if ce.mensajes and ce.estado != 'autorizado' %}<p class="tenue">{{ ce.mensajes|linebreaksbr }}</p>{% endif %}
+        <div class="acciones-fila">
+            <a class="btn btn-secundario btn-chico" href="{% url 'sri:descargar' ce.pk 'pdf' %}" target="_blank">Ver PDF (RIDE)</a>
+            <a class="btn btn-secundario btn-chico" href="{% url 'sri:descargar' ce.pk 'xml' %}">Descargar XML</a>
+            {% if ce.estado != 'autorizado' %}<form method="post" action="{% url 'sri:reintentar' ce.pk %}">{% csrf_token %}<input type="hidden" name="volver" value="{{ request.path }}"><button class="btn btn-verde btn-chico">Reintentar</button></form>{% endif %}
+        </div>
+    {% elif comp.estado == 'emitido' %}
+        <p class="tenue">Todavía no se envió al SRI.</p>
+        <form method="post" action="{% url 'sri:enviar' comp.pk %}">{% csrf_token %}<button class="btn btn-verde btn-chico">Firmar y enviar al SRI</button></form>
+    {% else %}<p class="tenue">Se envía al emitir.</p>{% endif %}
+</section>
+<section class="tarjeta-panel">
+    <h2>Pagos</h2>
+    {% if comp.tipo == 'factura' and comp.forma_pago == 'credito' and comp.estado == 'emitido' %}<p>Saldo pendiente: <strong>{{ saldo|dinero0 }}</strong></p>{% elif comp.tipo == 'factura' and comp.estado == 'emitido' %}<p>Pagada al contado ({{ comp.get_forma_pago_display|lower }}).</p>{% endif %}
+    {% for a in cobros %}<p>{{ a.cobro }} · {{ a.cobro.fecha|date:'d/m/Y' }} · {{ a.valor|dinero }}{% if a.cobro.estado == 'anulado' %} <span class="etiqueta etiqueta-roja">anulado</span>{% endif %}</p>{% endfor %}
+    {% for n in notas %}<p><a class="enlace" href="{% url 'facturacion:factura' n.pk %}">Nota de crédito {{ n.numero|default:'borrador' }}</a> · {{ n.total|dinero }} · {{ n.get_estado_display }}</p>{% endfor %}
+    <p class="tenue">Registrada por {{ comp.creado_por.nombres }} · {{ comp.creado_en|date:'d/m/Y H:i' }}</p>
+</section>
+</div>
+
+<div class="acciones">
+    {% if comp.estado == 'borrador' %}
+        <form method="post" action="{% url 'facturacion:factura_accion' comp.pk %}" data-confirmar="¿Eliminar este borrador?">{% csrf_token %}<button name="accion" value="eliminar" class="btn btn-secundario">Eliminar borrador</button></form>
+        <a href="{% url 'facturacion:factura_editar' comp.pk %}" class="btn btn-secundario">Editar</a>
+        <form method="post" action="{% url 'facturacion:factura_accion' comp.pk %}">{% csrf_token %}<button name="accion" value="emitir" class="btn btn-verde">Emitir y enviar al SRI</button></form>
+    {% elif comp.estado == 'emitido' %}
+        {% if comp.tipo == 'factura' %}
+            {% if saldo > 0 %}<a href="{% url 'facturacion:cobro_nuevo' %}?cliente={{ comp.cliente_id }}" class="btn btn-verde">Registrar cobro</a>{% endif %}
+            <a href="{% url 'facturacion:factura_nueva' %}?tipo=nota_credito&modifica={{ comp.pk }}" class="btn btn-secundario">Hacer nota de crédito</a>
+        {% endif %}
+        {% if empleado.es_admin %}
+        <form method="post" action="{% url 'facturacion:factura_accion' comp.pk %}" class="form-anular">{% csrf_token %}
+            <input name="motivo" autocomplete="off" class="entrada" maxlength="300" required minlength="5" placeholder="Motivo (ej. cliente equivocado)">
+            <button name="accion" value="corregir" class="btn btn-secundario" title="Anula y abre una copia en borrador">Corregir</button>
+            <button name="accion" value="anular" class="btn btn-rojo">Anular</button></form>
+        {% endif %}
+    {% endif %}
+</div>
+{% endblock %}

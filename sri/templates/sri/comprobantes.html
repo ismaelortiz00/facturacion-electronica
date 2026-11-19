@@ -1,0 +1,46 @@
+{% extends 'facturacion/base.html' %}
+{% load formato %}
+{% block titulo %}Autorizaciones del SRI{% endblock %}
+{% block contenido %}
+<div class="cabecera">
+    <div><h1>Autorizaciones del SRI</h1>
+        <p class="sub">{% if firma %}Ambiente <strong>{{ firma.get_ambiente_display }}</strong> · firma de {{ firma.titular }}, vence {{ firma.vence|date:'d/m/Y' }}.{% else %}Sin firma electrónica: súbela para enviar las facturas al SRI.{% endif %}</p></div>
+    <div class="acciones-fila">
+        {% if empleado.es_admin %}<a href="{% url 'sri:firma' %}" class="btn btn-secundario">Firma electrónica</a>{% endif %}
+        {% if firma %}<form method="post" action="{% url 'sri:pendientes' %}">{% csrf_token %}<button class="btn btn-verde">Enviar pendientes ({{ pendientes }})</button></form>{% endif %}
+    </div>
+</div>
+{% if total_sin_enviar and not estado %}
+<section class="tarjeta-panel sin-relleno bloque-sin-enviar">
+    <div class="tarjeta-cabeza"><h2>Emitidos que aún no se envían al SRI ({{ total_sin_enviar }})</h2>
+        {% if not firma %}<span class="tenue">Sube la firma electrónica (.p12) y presiona «Enviar pendientes».</span>{% endif %}</div>
+    <table class="tabla">
+        <thead><tr><th>Documento</th><th>Fecha</th><th>Cliente</th><th class="num">Total</th></tr></thead>
+        <tbody>{% for c in sin_enviar %}
+            <tr><td><a class="enlace" href="{% url 'facturacion:factura' c.pk %}">{{ c.get_tipo_display }} <span class="sin-cortar">{{ c.numero }}</span></a></td>
+                <td>{{ c.fecha|date:'d/m/Y' }}</td><td class="cortar">{{ c.cliente.nombre }}</td><td class="num">{{ c.total|dinero0 }}</td></tr>
+        {% endfor %}
+        {% if total_sin_enviar > 100 %}<tr><td colspan="4" class="vacio">… y {{ total_sin_enviar|add:'-100' }} más.</td></tr>{% endif %}</tbody>
+    </table>
+</section>
+<h2 class="titulo-seccion">Enviados al SRI</h2>
+{% endif %}
+<form method="get" class="filtros"><select name="estado" class="entrada" data-enviar-al-cambiar><option value="">Todos los estados</option>{% for v, t in estados %}<option value="{{ v }}" {% if estado == v %}selected{% endif %}>{{ t }}</option>{% endfor %}</select></form>
+<section class="tarjeta-panel sin-relleno">
+<table class="tabla">
+    <thead><tr><th>Documento</th><th>Fecha</th><th>Cliente</th><th>Estado en el SRI</th><th class="num">Total</th><th></th></tr></thead>
+    <tbody>
+    {% for c in comprobantes %}
+        <tr><td><a class="enlace" href="{% url 'facturacion:factura' c.comprobante.pk %}">{{ c.get_tipo_display }} <span class="sin-cortar">{{ c.comprobante.numero }}</span></a></td>
+            <td>{{ c.comprobante.fecha|date:'d/m/Y' }}</td><td class="cortar">{{ c.comprobante.cliente.nombre }}</td>
+            <td><span class="etiqueta {% if c.estado == 'autorizado' %}etiqueta-verde{% elif c.estado == 'devuelto' or c.estado == 'no_autorizado' %}etiqueta-roja{% else %}etiqueta-ambar{% endif %}">{{ c.get_estado_display }}</span>
+                {% if c.mensajes and c.estado != 'autorizado' %}<small class="tenue bloque">{{ c.mensajes|truncatechars:160 }}</small>{% endif %}</td>
+            <td class="num">{{ c.comprobante.total|dinero0 }}</td>
+            <td class="num sin-cortar"><a class="enlace" href="{% url 'sri:descargar' c.pk 'pdf' %}" target="_blank">PDF</a> · <a class="enlace" href="{% url 'sri:descargar' c.pk 'xml' %}">XML</a>
+                {% if c.estado != 'autorizado' %}<form method="post" action="{% url 'sri:reintentar' c.pk %}" class="en-linea">{% csrf_token %}<button class="btn btn-secundario btn-chico">Reintentar</button></form>{% endif %}</td></tr>
+    {% empty %}<tr><td colspan="6" class="vacio">Todavía no hay comprobantes enviados.</td></tr>{% endfor %}
+    </tbody>
+</table>
+</section>
+<p class="nota-izq">«Devuelto» o «No autorizado»: lee el mensaje del SRI y usa «Corregir» en la factura. «Sin conexión»: la factura ya está emitida; presiona «Reintentar» cuando vuelva el internet.</p>
+{% endblock %}

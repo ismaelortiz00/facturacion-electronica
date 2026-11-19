@@ -1,0 +1,16 @@
+{% extends 'facturacion/base.html' %}
+{% block titulo %}Bitácora{% endblock %}
+{% block contenido %}
+<div class="cabecera"><div><h1>Bitácora de actividades</h1><p class="sub">Quién hizo qué y cuándo, incluidas las acciones del asistente de IA.</p></div>
+    <a class="btn btn-secundario" href="?{% if not solo_ia %}ia=1{% endif %}">{% if solo_ia %}Ver todo{% else %}Solo acciones de la IA{% endif %}</a></div>
+<section class="tarjeta-panel sin-relleno">
+<table class="tabla tabla-compacta">
+    <thead><tr><th>Fecha</th><th>Usuario</th><th>Acción</th><th>Detalle</th></tr></thead>
+    <tbody>
+    {% for a in actividades %}<tr><td class="sin-cortar">{{ a.fecha|date:'d/m/Y H:i' }}</td><td>{{ a.usuario.nombres|default:'—' }}</td>
+        <td>{% if a.por_ia %}<span class="etiqueta etiqueta-gris">✦ IA</span> {% endif %}{{ a.accion }}</td><td class="cortar">{{ a.detalle }}</td></tr>
+    {% empty %}<tr><td colspan="4" class="vacio">Sin actividad.</td></tr>{% endfor %}
+    </tbody>
+</table>
+</section>
+{% endblock %}

@@ -1,0 +1,29 @@
+{% extends 'facturacion/base.html' %}
+{% load formato %}
+{% block titulo %}Quién me debe{% endblock %}
+{% block contenido %}
+<div class="cabecera"><div><h1>Quién me debe</h1><p class="sub">Facturas a crédito con saldo al {{ corte|date:'d/m/Y' }}, por días de atraso.</p></div>
+    <a href="{% url 'facturacion:cobro_nuevo' %}" class="btn btn-verde">+ Registrar cobro</a></div>
+<div class="kpis">
+    <div class="kpi kpi-verde"><span>Total por cobrar</span><strong>{{ c.totales.total|dinero0 }}</strong></div>
+    <div class="kpi"><span>Por vencer</span><strong>{{ c.totales.por_vencer|dinero0 }}</strong></div>
+    <div class="kpi"><span>Vencido 1 a 30 días</span><strong>{{ c.totales.d30|dinero0 }}</strong></div>
+    <div class="kpi kpi-rojo"><span>Vencido más de 90 días</span><strong>{{ c.totales.mas90|dinero0 }}</strong></div>
+</div>
+<section class="tarjeta-panel sin-relleno">
+<table class="tabla">
+    <thead><tr><th>Cliente / factura</th><th>Vence</th><th>Atraso</th><th class="num">Debe</th><th></th></tr></thead>
+    <tbody>
+    {% for cl in c.clientes %}
+        <tr class="fila-grupo"><td><strong>{{ cl.cliente.nombre }}</strong> <span class="tenue">{{ cl.cliente.identificacion }}</span></td><td></td><td></td><td class="num fuerte">{{ cl.total|dinero0 }}</td>
+            <td class="num"><a class="enlace" href="{% url 'facturacion:cobro_nuevo' %}?cliente={{ cl.cliente.pk }}">Cobrar</a></td></tr>
+        {% for f in cl.facturas %}
+        <tr data-href="{% url 'facturacion:factura' f.factura.pk %}"><td class="tenue">&nbsp;&nbsp;{{ f.factura.numero }} · {{ f.factura.fecha|date:'d/m/Y' }}</td><td>{{ f.factura.vencimiento|date:'d/m/Y' }}</td>
+            <td>{% if f.dias %}<span class="etiqueta {% if f.dias > 30 %}etiqueta-roja{% else %}etiqueta-ambar{% endif %}">{{ f.dias }} día{{ f.dias|pluralize }}</span>{% else %}<span class="etiqueta etiqueta-verde">al día</span>{% endif %}</td>
+            <td class="num">{{ f.saldo|dinero0 }}</td><td></td></tr>
+        {% endfor %}
+    {% empty %}<tr><td colspan="5" class="vacio">Nadie te debe.</td></tr>{% endfor %}
+    </tbody>
+</table>
+</section>
+{% endblock %}

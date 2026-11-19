@@ -1,0 +1,82 @@
+{% load static estaticos %}<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token }}">
+    <title>{% block titulo %}{% endblock %} | Facturación Turística IK</title>
+    <link rel="icon" type="image/svg+xml" href="{% static 'img/logo.svg' %}">
+    <link rel="stylesheet" href="{% estatico 'css/estilos.css' %}">
+    <link rel="stylesheet" href="{% estatico 'css/app.css' %}">
+    <link rel="stylesheet" href="{% estatico 'css/facturacion.css' %}">
+</head>
+<body class="cuerpo-app">
+<header class="barra">
+    <a class="barra-marca" href="{% url 'facturacion:inicio' %}"><img class="logo-img logo-img-chico" src="{% static 'img/logo.svg' %}" alt="IK"> Facturación Turística</a>
+    {% if iva_hoy %}
+    <a class="iva-hoy {% if iva_hoy.decreto %}iva-feriado{% endif %}" href="{% url 'facturacion:feriados' %}" title="Ver feriados e IVA">
+        {% if iva_hoy.decreto %}<strong>IVA turístico {{ iva_hoy.decreto.porcentaje|floatformat:'-2u' }} %</strong> · {{ iva_hoy.decreto.feriado }} hasta el {{ iva_hoy.decreto.hasta|date:'d/m' }}
+        {% else %}<strong>IVA hoy {{ iva_hoy.general|floatformat:'-2u' }} %</strong>{% if iva_hoy.proximo %} · próximo feriado: {{ iva_hoy.proximo.feriado }} ({{ iva_hoy.proximo.desde|date:'d/m' }}){% endif %}{% endif %}
+    </a>
+    {% endif %}
+    <div class="barra-derecha">
+        <span class="empresa-actual">{{ empresa|default:'Sin empresa' }} <small>{{ user.nombres }} · {{ empleado.get_rol_display }}</small></span>
+        <form action="{% url 'salir' %}" method="post">{% csrf_token %}<button type="submit" class="btn btn-secundario">Salir</button></form>
+    </div>
+</header>
+
+<div class="app">
+    <nav class="lateral" aria-label="Menú">
+        {% with r=request.resolver_match.url_name app=request.resolver_match.app_name %}
+        <a href="{% url 'facturacion:factura_nueva' %}" class="btn btn-verde btn-menu">+ Nueva factura</a>
+        <a href="{% url 'facturacion:inicio' %}" class="enlace-raiz {% if r == 'inicio' %}activo{% endif %}">Panel</a>
+        <a href="{% url 'asistente:pagina' %}" class="enlace-raiz {% if app == 'asistente' %}activo{% endif %}">Asistente IA</a>
+        <details class="menu-grupo" data-grupo="facturar" open><summary>Facturación</summary>
+            <a href="{% url 'facturacion:facturas' %}" class="{% if r == 'facturas' or r == 'factura' or r == 'factura_editar' or r == 'factura_nueva' %}activo{% endif %}">Facturas y notas de crédito</a>
+            <a href="{% url 'sri:comprobantes' %}" class="{% if app == 'sri' and r != 'firma' %}activo{% endif %}">Autorizaciones del SRI</a>
+        </details>
+        <details class="menu-grupo" data-grupo="cobros" open><summary>Cobros</summary>
+            <a href="{% url 'facturacion:cobros' %}" class="{% if r == 'cobros' or r == 'cobro_nuevo' %}activo{% endif %}">Cobros registrados</a>
+            <a href="{% url 'facturacion:reporte_cartera' %}" class="{% if r == 'reporte_cartera' %}activo{% endif %}">Quién me debe</a>
+        </details>
+        <details class="menu-grupo" data-grupo="catalogos" open><summary>Clientes y servicios</summary>
+            <a href="{% url 'facturacion:clientes' %}" class="{% if r == 'clientes' or r == 'cliente_nuevo' or r == 'cliente_editar' %}activo{% endif %}">Clientes</a>
+            <a href="{% url 'facturacion:servicios' %}" class="{% if r == 'servicios' or r == 'servicio_nuevo' or r == 'servicio_editar' %}activo{% endif %}">Servicios</a>
+            <a href="{% url 'facturacion:feriados' %}" class="{% if r == 'feriados' %}activo{% endif %}">Feriados e IVA</a>
+        </details>
+        <details class="menu-grupo" data-grupo="reportes" open><summary>Reportes</summary>
+            <a href="{% url 'facturacion:reporte_ventas' %}" class="{% if r == 'reporte_ventas' %}activo{% endif %}">Ventas</a>
+            <a href="{% url 'facturacion:reporte_iva' %}" class="{% if r == 'reporte_iva' %}activo{% endif %}">IVA a declarar</a>
+        </details>
+        {% if empleado.es_admin %}
+        <details class="menu-grupo" data-grupo="config" open><summary>Configuración</summary>
+            <a href="{% url 'facturacion:empresa' %}" class="{% if r == 'empresa' %}activo{% endif %}">Datos del negocio</a>
+            <a href="{% url 'sri:firma' %}" class="{% if r == 'firma' %}activo{% endif %}">Firma electrónica</a>
+            <a href="{% url 'facturacion:usuarios' %}" class="{% if r == 'usuarios' %}activo{% endif %}">Usuarios</a>
+            <a href="{% url 'facturacion:bitacora' %}" class="{% if r == 'bitacora' %}activo{% endif %}">Bitácora</a>
+        </details>
+        {% endif %}
+        {% endwith %}
+    </nav>
+
+    <main class="contenido">
+        {% if messages %}
+        <div class="mensajes">{% for m in messages %}<div class="mensaje {% if m.tags == 'success' %}ok{% elif m.tags == 'error' %}error{% elif m.tags == 'warning' %}aviso{% else %}info{% endif %}" role="alert">{{ m }}</div>{% endfor %}</div>
+        {% endif %}
+        {% block contenido %}{% endblock %}
+    </main>
+</div>
+
+{% if request.resolver_match.app_name != 'asistente' %}
+<button type="button" class="ia-boton" id="iaAbrir" aria-label="Abrir el asistente de IA"><span>✦</span> Asistente IA</button>
+{% endif %}
+<section class="ia-panel" id="iaPanel" hidden aria-label="Asistente de IA">
+    {% include 'asistente/_chat.html' %}
+</section>
+
+<script src="{% estatico 'js/app.js' %}"></script>
+<script src="{% estatico 'js/facturas.js' %}"></script>
+<script src="{% estatico 'js/asistente.js' %}"></script>
+<script src="{% estatico 'js/buscable.js' %}"></script>
+</body>
+</html>

@@ -1,0 +1,9 @@
+<div class="captcha" id="captcha" data-proveedor="{{ captcha_js }}">
+    {# Token 2: token del servidor + campo trampa invisible para las personas #}
+    <input type="text" name="website" class="trampa" tabindex="-1" autocomplete="off" aria-hidden="true">
+    <input type="hidden" name="token2" id="token2" value="{{ token2 }}">
+
+    {# Token 1: hCaptcha / reCAPTCHA con imágenes reales #}
+    <div class="{{ captcha_clase }}" data-sitekey="{{ captcha_sitekey }}" data-theme="dark"></div>
+    <p class="captcha-aviso" id="captchaAviso" hidden>No se pudo cargar la verificación. Revisa tu conexión a internet.</p>
+</div>

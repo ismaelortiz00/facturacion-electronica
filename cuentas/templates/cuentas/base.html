@@ -1,0 +1,39 @@
+{% load static estaticos %}<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token }}">
+    <title>{% block titulo %}{% endblock %} | Facturación Turística IK</title>
+    <link rel="icon" type="image/svg+xml" href="{% static 'img/logo.svg' %}">
+    <link rel="preload" as="image" href="{% static 'img/fondo.jpg' %}">
+    <link rel="stylesheet" href="{% estatico 'css/estilos.css' %}">
+    {% if captcha_script %}<script src="{{ captcha_script }}" async defer></script>{% endif %}
+</head>
+<body>
+{% block cuerpo %}
+<main class="escena">
+    <section class="tarjeta">
+        {# Lado izquierdo: la imagen se ve nítida a través de la tarjeta #}
+        <aside class="tarjeta-arte">
+            <div class="arte-marca"><img class="logo-img" src="{% static 'img/logo.svg' %}" alt="IK"> Facturación Turística IK</div>
+            <div class="arte-texto">
+                <h2>Cuentas claras,<br>datos protegidos.</h2>
+                <p>Acceso con cédula verificada, correo confirmado y doble token de seguridad.</p>
+            </div>
+        </aside>
+
+        {# Lado derecho: panel de vidrio con el formulario #}
+        <div class="tarjeta-form">
+            <header class="encabezado">
+                <h1>{% block encabezado %}Bienvenido{% endblock %}</h1>
+                <p>{% block subtitulo %}{% endblock %}</p>
+            </header>
+            {% block contenido %}{% endblock %}
+        </div>
+    </section>
+</main>
+{% endblock %}
+<script src="{% estatico 'js/app.js' %}"></script>
+</body>
+</html>

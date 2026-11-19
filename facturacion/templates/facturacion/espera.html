@@ -1,0 +1,7 @@
+{% extends 'cuentas/base.html' %}
+{% block titulo %}Cuenta en espera{% endblock %}
+{% block encabezado %}{% if sin_empresa %}Sistema sin configurar{% else %}Cuenta en espera{% endif %}{% endblock %}
+{% block subtitulo %}{% if sin_empresa %}El administrador debe registrar primero los datos del negocio.{% else %}Pide al administrador que te habilite en «Configuración → Usuarios» y vuelve a ingresar.{% endif %}{% endblock %}
+{% block contenido %}
+<form action="{% url 'salir' %}" method="post">{% csrf_token %}<button class="btn btn-principal" type="submit">Salir</button></form>
+{% endblock %}

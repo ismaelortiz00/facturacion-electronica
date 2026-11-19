@@ -1,0 +1,25 @@
+{% extends 'facturacion/base.html' %}
+{% block titulo %}Asistente IA{% endblock %}
+{% block contenido %}
+<div class="ia-pagina">
+    {% include 'asistente/_chat.html' %}
+    <details class="ia-mas">
+        <summary>Qué puede hacer el asistente · motor: {{ nombre_motor }}</summary>
+        <div class="ia-mas-cuerpo">
+            <ul class="lista-ayuda">
+                <li><strong>Facturar por ti:</strong> busca al cliente y los servicios, aplica el IVA del día y deja la factura lista para revisar.</li>
+                <li><strong>Responder con tus datos:</strong> ventas, servicios más vendidos, quién te debe, IVA a declarar.</li>
+                <li><strong>Explicar:</strong> «¿Por qué la factura 15 tiene 8 %?» o «¿Qué IVA hay el 2 de noviembre?».</li>
+                <li><strong>Avisar:</strong> «Revisa si hay problemas» (rechazos del SRI, morosos, borradores, firma por vencer).</li>
+            </ul>
+            <p class="tenue">Por seguridad no emite ni anula: eso lo hace una persona. Todo queda en la bitácora.
+            {% if motor == 'basico' %}Para la versión completa pon GROQ_API_KEY (gratis), GEMINI_API_KEY o ANTHROPIC_API_KEY en el archivo .env.{% endif %}</p>
+            {% if consultas %}
+            <table class="tabla tabla-compacta"><tbody>
+            {% for c in consultas %}<tr><td class="sin-cortar tenue">{{ c.fecha|date:'d/m H:i' }}</td>{% if empleado.es_admin %}<td>{{ c.usuario.nombres }}</td>{% endif %}<td class="cortar">{{ c.pregunta }}</td><td><span class="etiqueta etiqueta-gris">{{ c.get_modo_display }}</span></td></tr>{% endfor %}
+            </tbody></table>
+            {% endif %}
+        </div>
+    </details>
+</div>
+{% endblock %}

@@ -1,0 +1,24 @@
+{# Paso 2: el usuario escribe el código de 6 dígitos sin salir de la página #}
+<div class="paso-codigo" id="pasoCodigo" hidden
+     data-url-reenviar="{% url 'reenviar_codigo' %}">
+    <form id="formCodigo" action="{% url 'verificar_codigo' %}" method="post" data-ajax novalidate>
+        {% csrf_token %}
+        <input type="hidden" name="correo" id="codigoCorreo">
+        <p class="codigo-texto">Escribe el código de 6 dígitos que enviamos a <strong id="codigoDestino"></strong></p>
+
+        <div class="codigo-casillas" id="codigoCasillas">
+            {% for i in "123456" %}<input type="text" inputmode="numeric" maxlength="1" class="codigo-digito" aria-label="Dígito {{ forloop.counter }}" autocomplete="one-time-code">{% endfor %}
+        </div>
+        <input type="hidden" name="codigo" id="codigoValor">
+
+        <p class="codigo-desarrollo" id="codigoDesarrollo" hidden>
+            Modo desarrollo (sin servidor de correo): tu código es <strong></strong>
+        </p>
+
+        <button type="submit" class="btn btn-principal">Verificar código</button>
+    </form>
+    <nav class="enlaces">
+        <a href="#" id="reenviarCodigo">Reenviar código</a>
+        <a href="{% url 'login' %}">Ir al inicio de sesión</a>
+    </nav>
+</div>

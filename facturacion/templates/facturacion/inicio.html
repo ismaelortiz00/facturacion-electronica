@@ -1,0 +1,60 @@
+{% extends 'facturacion/base.html' %}
+{% load formato %}
+{% block titulo %}Panel{% endblock %}
+{% block contenido %}
+<div class="cabecera">
+    <div><h1>Hola, {{ user.nombres }}</h1><p class="sub">{{ empresa }} · ventas de {{ mes }} {{ hoy.year }}</p></div>
+</div>
+<nav class="accesos" aria-label="Accesos directos">
+    <a href="{% url 'facturacion:factura_nueva' %}">+ Factura</a>
+    <a href="{% url 'facturacion:cliente_nuevo' %}">+ Cliente</a>
+    <a href="{% url 'facturacion:cobro_nuevo' %}">+ Cobro</a>
+    <a href="{% url 'facturacion:reporte_iva' %}">IVA a declarar</a>
+    <a href="{% url 'asistente:pagina' %}">✦ Preguntar a la IA</a>
+</nav>
+
+<div class="kpis">
+    <article class="kpi kpi-verde"><span>Vendido en {{ mes }}</span><strong>{{ resumen.neto.total|dinero0 }}</strong><small>{{ resumen.facturas.cantidad }} factura{{ resumen.facturas.cantidad|pluralize }}{% if resumen.notas.cantidad %} · {{ resumen.notas.cantidad }} nota{{ resumen.notas.cantidad|pluralize }} de crédito{% endif %}</small></article>
+    <article class="kpi kpi-ambar"><span>Facturado con IVA de feriado</span><strong>{{ resumen.neto.reducida|dinero0 }}</strong><small>los turistas ahorraron {{ resumen.ahorro_clientes|dinero0 }}</small></article>
+    <article class="kpi"><span>IVA cobrado</span><strong>{{ resumen.neto.iva|dinero0 }}</strong><small>general {{ resumen.iva_general|dinero0 }} · feriado {{ resumen.iva_reducida|dinero0 }}</small></article>
+    <article class="kpi"><span>Por cobrar</span><strong>{{ por_cobrar|dinero0 }}</strong><small><a class="enlace" href="{% url 'facturacion:reporte_cartera' %}">ver quién debe</a></small></article>
+</div>
+
+<div class="panel-rejilla">
+    <section class="tarjeta-panel grafico">
+        <div class="tarjeta-cabeza"><h2>Ventas por día</h2><a class="enlace" href="{% url 'facturacion:reporte_ventas' %}">Reporte →</a></div>
+        <div class="leyenda"><span><i class="muestra serie-1"></i>Día normal</span><span><i class="muestra serie-2"></i>Día de feriado con IVA reducido</span></div>
+        {% include 'facturacion/_grafico.html' %}
+    </section>
+    <section class="tarjeta-panel">
+        <div class="tarjeta-cabeza"><h2>✦ Alertas del asistente</h2></div>
+        {% if alertas %}
+        <ul class="alertas">
+            {% for a in alertas %}<li class="{{ a.nivel }}"><span>{{ a.texto }}</span>
+                {% if a.enlace == 'sri' %}<a class="enlace sin-cortar" href="{% url 'sri:comprobantes' %}">Ver</a>
+                {% elif a.enlace == 'firma' and empleado.es_admin %}<a class="enlace sin-cortar" href="{% url 'sri:firma' %}">Subir</a>
+                {% elif a.enlace == 'cartera' %}<a class="enlace sin-cortar" href="{% url 'facturacion:reporte_cartera' %}">Ver</a>
+                {% elif a.enlace == 'borradores' %}<a class="enlace sin-cortar" href="{% url 'facturacion:facturas' %}?estado=borrador">Ver</a>{% endif %}</li>{% endfor %}
+        </ul>
+        {% else %}<p class="tenue">Todo en orden.</p>{% endif %}
+    </section>
+</div>
+
+<div class="tarjetas-dos">
+    <section class="tarjeta-panel">
+        <div class="tarjeta-cabeza"><h2>Próximos feriados con IVA reducido</h2><a class="enlace" href="{% url 'facturacion:feriados' %}">Todos →</a></div>
+        <table class="tabla tabla-compacta"><tbody>
+        {% for d in decretos %}<tr><td>{{ d.feriado }}<small class="tenue bloque">{{ d.decreto }}</small></td><td class="sin-cortar">{{ d.desde|date:'d/m' }} – {{ d.hasta|date:'d/m/Y' }}</td><td class="num iva-reducido">{{ d.porcentaje|pct }} %</td></tr>
+        {% empty %}<tr><td class="vacio">No hay decretos próximos registrados. Cuando el Gobierno publique uno, regístralo en «Feriados e IVA».</td></tr>{% endfor %}
+        </tbody></table>
+    </section>
+    <section class="tarjeta-panel">
+        <div class="tarjeta-cabeza"><h2>Últimos documentos</h2><a class="enlace" href="{% url 'facturacion:facturas' %}">Todos →</a></div>
+        <table class="tabla tabla-compacta"><tbody>
+        {% for c in ultimas %}<tr data-href="{% url 'facturacion:factura' c.pk %}"><td class="mono">{% if c.tipo == "nota_credito" %}NC {% endif %}{{ c.numero }}</td><td class="cortar">{{ c.cliente.nombre }}</td>
+            <td>{% if c.decreto %}<span class="etiqueta etiqueta-feriado">{{ c.decreto.porcentaje|pct }} %</span>{% endif %}</td><td class="num">{{ c.total|dinero }}</td></tr>
+        {% empty %}<tr><td class="vacio">Aún no hay facturas. <a class="enlace" href="{% url 'facturacion:factura_nueva' %}">Haz la primera</a>.</td></tr>{% endfor %}
+        </tbody></table>
+    </section>
+</div>
+{% endblock %}

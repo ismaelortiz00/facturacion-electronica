@@ -1,0 +1,22 @@
+{% extends 'facturacion/base.html' %}
+{% block titulo %}Firma electrónica{% endblock %}
+{% block contenido %}
+<div class="cabecera"><div><h1>Firma electrónica</h1><p class="sub">El archivo .p12 que entrega la entidad certificadora (Security Data, Banco Central, Uanataca…). La clave se guarda cifrada.</p></div></div>
+{% if firma %}<section class="tarjeta-panel"><dl class="datos">
+    <div><dt>Titular</dt><dd>{{ firma.titular }}</dd></div><div><dt>Emitida por</dt><dd>{{ firma.emisor }}</dd></div>
+    <div><dt>Vence</dt><dd>{{ firma.vence|date:'d/m/Y' }}</dd></div><div><dt>Ambiente</dt><dd><strong>{{ firma.get_ambiente_display }}</strong></dd></div>
+</dl></section>{% endif %}
+<form method="post" enctype="multipart/form-data" class="tarjeta-panel formulario">
+    {% csrf_token %}
+    <div class="rejilla-2">
+        <label>Archivo .p12 {% if firma %}(solo si la cambias){% endif %}<input type="file" name="archivo" accept=".p12,.pfx" class="entrada" {% if not firma %}required{% endif %}></label>
+        <label>Clave de la firma <input type="password" name="clave" class="entrada" autocomplete="new-password"></label>
+        <label>Ambiente del SRI <select name="ambiente" class="entrada">
+            <option value="1" {% if not firma or firma.ambiente == '1' %}selected{% endif %}>Pruebas (para practicar; sin validez tributaria)</option>
+            <option value="2" {% if firma.ambiente == '2' %}selected{% endif %}>Producción</option></select>
+            <small class="tenue">Empieza en pruebas. Cuando el SRI autorice bien, cambia a producción.</small></label>
+        <label class="casilla"><input type="checkbox" name="enviar_correo" {% if not firma or firma.enviar_correo %}checked{% endif %}> Enviar el PDF y el XML al correo del cliente al autorizarse</label>
+    </div>
+    <div class="acciones"><button class="btn btn-verde">Guardar</button></div>
+</form>
+{% endblock %}

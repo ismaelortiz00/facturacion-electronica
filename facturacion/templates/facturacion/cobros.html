@@ -1,0 +1,28 @@
+{% extends 'facturacion/base.html' %}
+{% load formato %}
+{% block titulo %}Cobros{% endblock %}
+{% block contenido %}
+<div class="cabecera">
+    <div><h1>Cobros</h1><p class="sub">Pagos de clientes que compraron a crédito. Total cobrado en el rango: <strong>{{ total|dinero0 }}</strong>.</p></div>
+    <a href="{% url 'facturacion:cobro_nuevo' %}" class="btn btn-verde">+ Registrar cobro</a>
+</div>
+<form method="get" class="filtros">
+    <label>Desde <input type="date" name="desde" value="{{ desde|date:'Y-m-d' }}" class="entrada"></label>
+    <label>Hasta <input type="date" name="hasta" value="{{ hasta|date:'Y-m-d' }}" class="entrada"></label>
+    <button class="btn btn-verde">Ver</button>
+</form>
+<section class="tarjeta-panel sin-relleno">
+<table class="tabla">
+    <thead><tr><th>N.º</th><th>Fecha</th><th>Cliente</th><th>Forma</th><th>Referencia</th><th>Registró</th><th>Estado</th><th class="num">Valor</th><th></th></tr></thead>
+    <tbody>
+    {% for c in cobros %}
+        <tr><td>{{ c.numero }}</td><td>{{ c.fecha|date:'d/m/Y' }}</td><td class="cortar">{{ c.cliente.nombre }}</td><td>{{ c.get_forma_display }}</td>
+            <td>{{ c.referencia }}</td><td>{{ c.creado_por.nombres }}</td>
+            <td><span class="etiqueta {% if c.estado == 'emitido' %}etiqueta-verde{% else %}etiqueta-roja{% endif %}" title="{{ c.motivo_anulacion }}">{{ c.get_estado_display }}</span></td>
+            <td class="num">{{ c.valor|dinero0 }}</td>
+            <td class="num">{% if empleado.es_admin and c.estado == 'emitido' %}<form method="post" action="{% url 'facturacion:cobro_anular' c.pk %}" class="en-linea">{% csrf_token %}<input name="motivo" class="entrada entrada-chica" required minlength="5" placeholder="Motivo" autocomplete="off"><button class="btn btn-rojo btn-chico">Anular</button></form>{% endif %}</td></tr>
+    {% empty %}<tr><td colspan="9" class="vacio">No hay cobros en ese rango.</td></tr>{% endfor %}
+    </tbody>
+</table>
+</section>
+{% endblock %}

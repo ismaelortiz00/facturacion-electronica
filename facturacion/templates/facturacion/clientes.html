@@ -1,0 +1,24 @@
+{% extends 'facturacion/base.html' %}
+{% load formato %}
+{% block titulo %}Clientes{% endblock %}
+{% block contenido %}
+<div class="cabecera">
+    <div><h1>Clientes</h1><p class="sub">Huéspedes, turistas y empresas. La cédula y el RUC se validan; los extranjeros, con pasaporte.</p></div>
+    <a href="{% url 'facturacion:cliente_nuevo' %}" class="btn btn-verde">+ Nuevo cliente</a>
+</div>
+<form method="get" class="filtros"><input type="search" name="q" value="{{ q }}" placeholder="Nombre, cédula, RUC o correo" class="entrada entrada-ancha"><button class="btn btn-verde">Buscar</button></form>
+<section class="tarjeta-panel sin-relleno">
+<table class="tabla">
+    <thead><tr><th>Identificación</th><th>Nombre</th><th>Correo</th><th>Teléfono</th><th>País</th><th class="num">Debe</th></tr></thead>
+    <tbody>
+    {% for c in clientes %}
+        <tr data-href="{% url 'facturacion:cliente_editar' c.pk %}" class="{% if not c.activo %}fila-inactiva{% endif %}">
+            <td class="mono">{{ c.identificacion }} <small class="tenue bloque">{{ c.get_tipo_identificacion_display }}</small></td>
+            <td>{{ c.nombre }}</td><td>{{ c.correo|default:'—' }}</td><td>{{ c.telefono }}</td><td>{{ c.pais }}</td>
+            <td class="num">{{ c.saldo|dinero }}</td>
+        </tr>
+    {% empty %}<tr><td colspan="6" class="vacio">Todavía no hay clientes. <a class="enlace" href="{% url 'facturacion:cliente_nuevo' %}">Registra el primero</a>.</td></tr>{% endfor %}
+    </tbody>
+</table>
+</section>
+{% endblock %}

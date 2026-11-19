@@ -1,0 +1,209 @@
+/* =====================================================================
+   FACTURACIÓN TURÍSTICA IK · estilos propios (sobre estilos.css y app.css)
+   Verde #2fae6e = tarifa general · Ámbar #c98500 = IVA reducido de feriado
+   (pareja validada para daltonismo y contraste sobre el fondo oscuro)
+   ===================================================================== */
+:root { --serie-1: #2fae6e; --serie-2: #c98500; --ambar-claro: #ffd27a; }
+
+.barra { gap: 18px; }
+.barra-marca { text-decoration: none; color: inherit; }
+.barra-derecha { display: flex; align-items: center; gap: 14px; margin-left: auto; }
+.iva-hoy { padding: 7px 14px; border-radius: 999px; font-size: 13px; text-decoration: none; color: #e6f2ea;
+           background: rgba(47,174,110,.16); border: 1px solid rgba(47,174,110,.45); white-space: nowrap;
+           overflow: hidden; text-overflow: ellipsis; max-width: 46vw; }
+.iva-hoy.iva-feriado { background: rgba(201,133,0,.2); border-color: var(--serie-2); color: var(--ambar-claro); }
+.btn-menu { display: block; text-align: center; margin: 0 0 14px; }
+.lateral a.btn-menu { color: #06130c; padding: 11px 12px; }
+.mensaje.aviso { background: rgba(201,133,0,.16); border: 1px solid rgba(201,133,0,.45); color: var(--ambar-claro); }
+
+/* Menú por grupos */
+.lateral a.enlace-raiz { font-weight: 600; }
+.menu-grupo { margin-top: 4px; }
+.menu-grupo > summary { list-style: none; cursor: pointer; display: flex; justify-content: space-between; align-items: center;
+    padding: 10px 12px; border-radius: 10px; font-weight: 600; color: rgba(226,238,230,.92); user-select: none; }
+.menu-grupo > summary::-webkit-details-marker { display: none; }
+.menu-grupo > summary::after { content: '›'; font-size: 18px; line-height: 1; transition: transform .2s; color: rgba(226,238,230,.5); }
+.menu-grupo[open] > summary::after { transform: rotate(90deg); }
+.menu-grupo > summary:hover { background: rgba(255,255,255,.06); }
+.menu-grupo > a { padding-left: 24px !important; font-size: 14px; }
+
+/* Listas con buscador */
+.buscable { position: relative; width: 100%; }
+.buscable-oculto { position: absolute !important; opacity: 0; pointer-events: none; width: 1px !important; height: 1px; overflow: hidden; }
+.buscable-campo { width: 100%; }
+.buscable-lista { position: fixed; z-index: 60; max-height: 300px; overflow-y: auto; margin: 0; padding: 6px; list-style: none;
+    background: #0f2118; border: 1px solid rgba(159,232,188,.25); border-radius: 12px; box-shadow: 0 16px 40px rgba(0,0,0,.5); font-size: 14px; }
+.buscable-lista li { padding: 8px 10px; border-radius: 8px; cursor: pointer; color: #e6f2ea; }
+.buscable-lista li.activo { background: rgba(47,174,110,.28); }
+.buscable-lista li.elegido { font-weight: 700; }
+.buscable-lista li.buscable-grupo { cursor: default; font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: rgba(226,238,230,.5); }
+.buscable-lista li.buscable-vacio { cursor: default; color: rgba(226,238,230,.55); }
+
+/* Factura */
+.aviso-iva { padding: 10px 14px; border-radius: 12px; margin: 4px 0 16px; font-size: 14px; background: rgba(47,174,110,.1);
+             border: 1px solid rgba(47,174,110,.35); }
+.aviso-iva.feriado { background: rgba(201,133,0,.14); border-color: rgba(201,133,0,.55); color: var(--ambar-claro); }
+.iva-reducido { color: var(--ambar-claro); font-weight: 700; }
+.etiqueta-feriado { background: rgba(201,133,0,.22); color: var(--ambar-claro); }
+.total-grande { font-size: 1.2em; color: #e6fff0; }
+.tabla-lineas td:first-child { min-width: 240px; }
+.tabla-lineas input[name="descripcion"] { min-width: 150px; }
+.col-iva { min-width: 120px; font-size: 13px; }
+td .error-campo, .error-campo { display: block; color: #ff9b8a; font-size: 12.5px; margin-top: 2px; }
+small.bloque { display: block; margin-top: 3px; white-space: normal; }
+.formulario label small { display: block; font-weight: 400; margin-top: 2px; }
+.relleno-titulo { padding: 16px 18px 4px; margin: 0; }
+.tarjeta-panel h2 { font-size: 1.02rem; margin: 0 0 10px; }
+.tarjeta-cabeza { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; margin-bottom: 8px; }
+.tarjeta-cabeza h2 { margin: 0; }
+.kpi small { display: block; color: rgba(255,255,255,.55); font-size: 11.5px; margin-top: 2px; }
+.kpi-ambar strong { color: var(--ambar-claro); }
+.form-anular { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.sin-cortar { white-space: nowrap; }
+form.en-linea { display: inline-flex; gap: 8px; align-items: center; }
+
+/* Alertas del panel */
+.alertas { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.alertas li { padding: 10px 12px 10px 14px; border-radius: 10px; font-size: 14px; border-left: 3px solid var(--serie-1);
+              background: rgba(255,255,255,.04); display: flex; justify-content: space-between; gap: 10px; align-items: center; }
+.alertas li.aviso { border-left-color: var(--serie-2); }
+.alertas li.error { border-left-color: #e0735f; background: rgba(224,115,95,.08); }
+.alertas li.info { border-left-color: #5aa9e6; }
+.alertas li::before { content: 'ℹ'; margin-right: 6px; opacity: .8; }
+.alertas li.aviso::before { content: '⚠'; }
+.alertas li.error::before { content: '✕'; }
+
+/* Gráfico de ventas por día */
+.grafico svg { width: 100%; height: auto; display: block; }
+.grafico .grilla { stroke: rgba(255,255,255,.08); }
+.grafico .eje { fill: rgba(255,255,255,.55); font-size: 11px; }
+.grafico rect.serie-1 { fill: var(--serie-1); }
+.grafico rect.serie-2 { fill: var(--serie-2); }
+.grafico rect.barra-dia:hover { opacity: .8; }
+.leyenda { display: flex; gap: 16px; font-size: 12.5px; margin-bottom: 6px; color: rgba(255,255,255,.75); flex-wrap: wrap; }
+.muestra { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: -1px; margin-right: 6px; }
+.muestra.serie-1 { background: var(--serie-1); }
+.muestra.serie-2 { background: var(--serie-2); }
+.panel-rejilla { display: grid; grid-template-columns: 2fr 1fr; gap: 18px; margin-bottom: 18px; }
+.accesos { display: flex; flex-wrap: wrap; gap: 8px; margin: -4px 0 18px; }
+.accesos a { padding: 8px 14px; border-radius: 999px; border: 1px solid rgba(255,255,255,.14); background: rgba(255,255,255,.05);
+             color: inherit; text-decoration: none; font-size: 13px; font-weight: 600; }
+.accesos a:hover { background: rgba(47,174,110,.18); border-color: var(--serie-1); }
+
+/* =====================================================================
+   Asistente de IA · estilo conversacional (saludo con degradado, tarjetas,
+   respuestas sin burbuja, caja de texto redondeada) con los colores de IK
+   ===================================================================== */
+:root { --ia-degradado: linear-gradient(100deg, #8ff0bd 0%, #2fae6e 38%, #c98500 78%, #ffd27a 100%); }
+.ia-boton { position: fixed; right: 22px; bottom: 22px; z-index: 40; border: 1px solid rgba(159,232,188,.35); cursor: pointer;
+            padding: 12px 18px 12px 14px; border-radius: 999px; font-weight: 600; font-size: 14px; color: #eafff2;
+            background: rgba(12,30,21,.92); backdrop-filter: blur(10px); box-shadow: 0 12px 34px rgba(0,0,0,.5);
+            display: flex; align-items: center; gap: 8px; transition: transform .15s, box-shadow .15s; }
+.ia-boton:hover { transform: translateY(-2px); box-shadow: 0 16px 40px rgba(0,0,0,.55), 0 0 0 3px rgba(47,174,110,.25); }
+.ia-boton span { font-size: 18px; background: var(--ia-degradado); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.ia-panel { position: fixed; right: 22px; bottom: 22px; z-index: 45; width: min(440px, calc(100vw - 30px));
+            height: min(660px, calc(100vh - 96px)); border-radius: 24px; overflow: hidden;
+            background: #0b1a12; border: 1px solid rgba(159,232,188,.18); box-shadow: 0 30px 80px rgba(0,0,0,.65); }
+
+.ia-chat { display: flex; flex-direction: column; height: 100%; color: #e9f4ee; }
+.ia-cabeza { display: flex; justify-content: space-between; align-items: center; padding: 14px 16px 10px; }
+.ia-marca { display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 15px; }
+.ia-chispa { font-size: 18px; background: var(--ia-degradado); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.ia-modo { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 999px; background: rgba(47,174,110,.18); color: #9fe8bc; }
+.ia-modo.ia-modo-basico { background: rgba(201,133,0,.18); color: var(--ambar-claro); }
+.ia-modo:empty { display: none; }
+.ia-cabeza-botones { display: flex; gap: 4px; }
+.ia-icono { width: 34px; height: 34px; border-radius: 50%; border: 0; background: transparent; color: #cfe6d9; cursor: pointer;
+            display: grid; place-items: center; }
+.ia-icono:hover { background: rgba(255,255,255,.08); }
+.ia-icono svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
+.ia-pagina .ia-solo-panel { display: none; }
+
+.ia-cuerpo { flex: 1; overflow-y: auto; padding: 4px 18px 8px; scroll-behavior: smooth; }
+.ia-bienvenida { padding: 18px 2px 8px; }
+.ia-saludo { margin: 0; font-family: var(--serif, Georgia, serif); font-weight: 600; font-size: clamp(28px, 4vw, 44px); line-height: 1.15; }
+.ia-saludo span { background: var(--ia-degradado); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.ia-pregunta { margin: 4px 0 22px; font-size: clamp(20px, 2.6vw, 30px); color: rgba(233,244,238,.45); font-family: var(--serif, Georgia, serif); }
+.ia-tarjetas { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.ia-tarjetas button { position: relative; text-align: left; min-height: 104px; padding: 14px 14px 36px; border-radius: 16px; cursor: pointer;
+                      border: 1px solid rgba(255,255,255,.07); background: rgba(255,255,255,.045); color: #e9f4ee;
+                      display: flex; flex-direction: column; gap: 4px; transition: background .15s, transform .15s, border-color .15s; }
+.ia-tarjetas button:hover { background: rgba(47,174,110,.12); border-color: rgba(47,174,110,.4); transform: translateY(-2px); }
+.ia-tarjetas button span { font-weight: 600; font-size: 14px; }
+.ia-tarjetas button small { color: rgba(233,244,238,.55); font-size: 12.5px; }
+.ia-tarjetas button i { position: absolute; right: 12px; bottom: 10px; font-style: normal; font-size: 17px; width: 32px; height: 32px;
+                        display: grid; place-items: center; border-radius: 50%; background: rgba(0,0,0,.25); }
+
+.ia-mensajes { display: flex; flex-direction: column; gap: 18px; padding-top: 6px; }
+.ia-msg { font-size: 14.5px; line-height: 1.6; }
+.ia-yo { align-self: flex-end; max-width: 82%; background: rgba(47,174,110,.2); border: 1px solid rgba(47,174,110,.25);
+         padding: 10px 16px; border-radius: 20px 20px 6px 20px; white-space: pre-wrap; }
+.ia-bot { display: grid; grid-template-columns: 30px 1fr; gap: 12px; align-items: start; }
+.ia-avatar { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; font-size: 15px; color: #06130c;
+             background: var(--ia-degradado); box-shadow: 0 0 0 3px rgba(47,174,110,.15); }
+.ia-texto { padding-top: 3px; min-width: 0; overflow-wrap: anywhere; }
+.ia-texto strong { color: #ffffff; }
+.ia-vineta { display: block; position: relative; padding-left: 16px; margin: 3px 0; }
+.ia-vineta::before { content: ''; position: absolute; left: 3px; top: .62em; width: 6px; height: 6px; border-radius: 50%; background: var(--serie-1); }
+.ia-accion { display: inline-flex; margin: 10px 8px 0 0; padding: 8px 14px; border-radius: 999px; text-decoration: none; font-weight: 600;
+             font-size: 13px; color: #06130c; background: linear-gradient(135deg, #8ff0bd, #2fae6e); }
+.ia-accion:hover { filter: brightness(1.08); }
+.ia-pie { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.ia-herramienta, .ia-aviso { font-size: 11px; padding: 3px 9px; border-radius: 999px; background: rgba(255,255,255,.06); color: rgba(233,244,238,.6); }
+.ia-herramienta::before { content: '⚙ '; opacity: .7; }
+.ia-aviso { background: rgba(201,133,0,.16); color: var(--ambar-claro); }
+
+/* Pensando: el ✦ gira y unas líneas brillan */
+.ia-girando { animation: ia-girar 1.6s linear infinite; }
+@keyframes ia-girar { to { transform: rotate(360deg); } }
+.ia-brillo { display: block; height: 12px; border-radius: 6px; margin: 6px 0 8px; width: 92%;
+             background: linear-gradient(90deg, rgba(47,174,110,.12) 0%, rgba(143,240,189,.45) 30%, rgba(201,133,0,.3) 50%, rgba(47,174,110,.12) 70%);
+             background-size: 300% 100%; animation: ia-brillar 1.4s ease-in-out infinite; }
+.ia-brillo.corta { width: 55%; }
+@keyframes ia-brillar { from { background-position: 100% 0; } to { background-position: -100% 0; } }
+
+/* Caja para escribir */
+.ia-form { padding: 8px 14px 12px; }
+.ia-caja { display: flex; align-items: flex-end; gap: 8px; padding: 8px 8px 8px 18px; border-radius: 28px;
+           background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1); transition: border-color .15s, box-shadow .15s; }
+.ia-caja:focus-within { border-color: rgba(47,174,110,.6); box-shadow: 0 0 0 4px rgba(47,174,110,.12); }
+.ia-caja textarea { flex: 1; resize: none; border: 0; outline: 0; background: transparent; color: #eef7f1; font: inherit;
+                    font-size: 15px; line-height: 1.45; padding: 8px 0; max-height: 160px; }
+.ia-caja textarea::placeholder { color: rgba(233,244,238,.45); }
+.ia-enviar { width: 40px; height: 40px; flex: none; border-radius: 50%; border: 0; cursor: pointer; display: grid; place-items: center;
+             color: #06130c; background: linear-gradient(135deg, #8ff0bd, #2fae6e); transition: opacity .15s, transform .15s; }
+.ia-enviar:disabled { opacity: .25; cursor: default; }
+.ia-enviar:not(:disabled):hover { transform: scale(1.06); }
+.ia-enviar svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.ia-nota { margin: 8px 6px 0; text-align: center; font-size: 11.5px; color: rgba(233,244,238,.4); }
+
+/* Página completa: columna central, como una conversación */
+.ia-pagina { max-width: 860px; margin: 0 auto; }
+.ia-pagina .ia-chat { height: calc(100vh - 140px); min-height: 520px; }
+.ia-pagina .ia-cabeza { padding: 0 4px 6px; }
+.ia-pagina .ia-cuerpo { padding: 0 4px 8px; }
+.ia-pagina .ia-bienvenida { padding-top: 6vh; }
+.ia-pagina .ia-tarjetas { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.ia-pagina .ia-tarjetas button { min-height: 150px; }
+.ia-pagina .ia-form { padding: 8px 0 0; }
+.ia-pagina .ia-caja { padding: 10px 10px 10px 22px; }
+.ia-mas { margin: 18px 0 0; border-radius: 16px; background: rgba(255,255,255,.035); border: 1px solid rgba(255,255,255,.07); }
+.ia-mas summary { cursor: pointer; padding: 12px 16px; font-size: 13px; color: rgba(233,244,238,.65); }
+.ia-mas-cuerpo { padding: 0 16px 14px; }
+@media (max-width: 900px) { .ia-pagina .ia-tarjetas { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (prefers-reduced-motion: reduce) { .ia-girando, .ia-brillo { animation: none; } }
+
+@media (max-width: 1100px) { .panel-rejilla { grid-template-columns: 1fr; } .iva-hoy { max-width: 60vw; } }
+@media (max-width: 760px) { .empresa-actual { display: none; } }
+[hidden] { display: none !important; }
+.contenido { padding-bottom: 96px; }
+.ia-caja textarea { min-height: 24px; }
+
+/* Autorizaciones del SRI: bloque de emitidos sin enviar */
+.bloque-sin-enviar { margin-bottom: 22px; }
+.bloque-sin-enviar .tarjeta-cabeza { padding: 18px 18px 6px; flex-wrap: wrap; }
+.bloque-sin-enviar .tarjeta-cabeza h2 { font-size: 16px; }
+.bloque-sin-enviar .tarjeta-cabeza .tenue { font-size: 13px; }
+.bloque-sin-enviar tbody { display: block; max-height: 340px; overflow-y: auto; }
+.bloque-sin-enviar thead, .bloque-sin-enviar tbody tr { display: table; width: 100%; table-layout: fixed; }
+.titulo-seccion { font-size: 16px; margin: 0 0 12px; color: var(--blanco, #f2f7f3); }

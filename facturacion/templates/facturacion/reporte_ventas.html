@@ -1,0 +1,40 @@
+{% extends 'facturacion/base.html' %}
+{% load formato %}
+{% block titulo %}Reporte de ventas{% endblock %}
+{% block contenido %}
+<div class="cabecera">
+    <div><h1>Ventas</h1><p class="sub">Del {{ desde|date:'d/m/Y' }} al {{ hasta|date:'d/m/Y' }} · facturas menos notas de crédito.</p></div>
+    <a class="btn btn-secundario" href="?desde={{ desde|date:'Y-m-d' }}&hasta={{ hasta|date:'Y-m-d' }}&formato=excel">Exportar a Excel</a>
+</div>
+<form method="get" class="filtros">
+    <label>Desde <input type="date" name="desde" value="{{ desde|date:'Y-m-d' }}" class="entrada"></label>
+    <label>Hasta <input type="date" name="hasta" value="{{ hasta|date:'Y-m-d' }}" class="entrada"></label>
+    <button class="btn btn-verde">Ver</button>
+</form>
+<div class="kpis">
+    <div class="kpi kpi-verde"><span>Total vendido</span><strong>{{ r.neto.total|dinero0 }}</strong><small>{{ r.facturas.cantidad }} factura{{ r.facturas.cantidad|pluralize }} · {{ r.notas.cantidad }} nota{{ r.notas.cantidad|pluralize }}</small></div>
+    <div class="kpi"><span>Base tarifa general</span><strong>{{ r.neto.general|dinero0 }}</strong><small>IVA {{ r.iva_general|dinero0 }}</small></div>
+    <div class="kpi kpi-ambar"><span>Base IVA reducido (feriados)</span><strong>{{ r.neto.reducida|dinero0 }}</strong><small>IVA {{ r.iva_reducida|dinero0 }} · ahorro turistas {{ r.ahorro_clientes|dinero0 }}</small></div>
+    <div class="kpi"><span>Base 0 % / exenta</span><strong>{{ r.neto.cero|dinero0 }}</strong></div>
+</div>
+{% if grafico %}
+<section class="tarjeta-panel grafico">
+    <div class="leyenda"><span><i class="muestra serie-1"></i>Día normal</span><span><i class="muestra serie-2"></i>Día de feriado con IVA reducido</span></div>
+    {% include 'facturacion/_grafico.html' %}
+</section>
+{% endif %}
+<div class="tarjetas-dos">
+<section class="tarjeta-panel sin-relleno">
+    <h2 class="relleno-titulo">Por servicio</h2>
+    <table class="tabla tabla-compacta"><thead><tr><th>Servicio</th><th class="num">Cantidad</th><th class="num">Vendido sin IVA</th><th class="num">IVA</th></tr></thead><tbody>
+    {% for f in por_servicio %}<tr><td>{{ f.servicio.nombre }}</td><td class="num">{{ f.cantidad|floatformat:'-2u' }}</td><td class="num">{{ f.base|dinero0 }}</td><td class="num">{{ f.iva|dinero0 }}</td></tr>
+    {% empty %}<tr><td colspan="4" class="vacio">Sin ventas.</td></tr>{% endfor %}</tbody></table>
+</section>
+<section class="tarjeta-panel sin-relleno">
+    <h2 class="relleno-titulo">Por día</h2>
+    <table class="tabla tabla-compacta"><thead><tr><th>Fecha</th><th class="num">Tarifa general</th><th class="num">IVA reducido</th><th class="num">Total</th></tr></thead><tbody>
+    {% for d in dias %}<tr><td>{{ d.fecha|date:'D d/m'|lower }}{% if d.feriado %} <span class="etiqueta etiqueta-feriado">feriado</span>{% endif %}</td><td class="num">{{ d.general|dinero }}</td><td class="num">{{ d.reducida|dinero }}</td><td class="num">{{ d.total|dinero0 }}</td></tr>
+    {% empty %}<tr><td colspan="4" class="vacio">Sin ventas.</td></tr>{% endfor %}</tbody></table>
+</section>
+</div>
+{% endblock %}

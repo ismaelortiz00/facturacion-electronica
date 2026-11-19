@@ -1,0 +1,24 @@
+{% extends 'facturacion/base.html' %}
+{% block titulo %}{{ titulo }}{% endblock %}
+{% block contenido %}
+<div class="cabecera"><div><h1>{{ titulo }}</h1>{% if ayuda %}<p class="sub">{{ ayuda }}</p>{% endif %}</div></div>
+<form method="post" class="tarjeta-panel formulario" novalidate>
+    {% csrf_token %}
+    {% if form.non_field_errors %}<div class="mensaje error">{{ form.non_field_errors|join:' ' }}</div>{% endif %}
+    <div class="rejilla-2">
+        {% for campo in form %}
+            {% if campo.field.widget.input_type == 'checkbox' %}
+                <label class="casilla">{{ campo }} {{ campo.label|capfirst }}{% if campo.help_text %}<small class="tenue">{{ campo.help_text }}</small>{% endif %}</label>
+            {% else %}
+                <label>{{ campo.label|capfirst }} {{ campo }}
+                    {% if campo.help_text %}<small class="tenue">{{ campo.help_text }}</small>{% endif %}
+                    {% for e in campo.errors %}<small class="error-campo">{{ e }}</small>{% endfor %}</label>
+            {% endif %}
+        {% endfor %}
+    </div>
+    <div class="acciones">
+        <a href="{{ volver }}" class="btn btn-secundario">Cancelar</a>
+        <button type="submit" class="btn btn-verde">Guardar</button>
+    </div>
+</form>
+{% endblock %}

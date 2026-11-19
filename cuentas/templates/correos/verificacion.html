@@ -1,0 +1,12 @@
+<div style="font-family:Arial,sans-serif;max-width:520px;margin:auto;border:1px solid #e2e8f0;border-radius:10px;overflow:hidden">
+    <div style="background:#0b1f14;color:#9fe8bc;padding:16px 22px;font-size:18px;font-family:Georgia,serif">Facturación Turística IK</div>
+    <div style="padding:22px;color:#1e293b">
+        <h2 style="margin-top:0">Tu código de verificación</h2>
+        <p>Hola {{ usuario.nombres }}, escribe este código en la página de registro para verificar tu correo:</p>
+        <p style="text-align:center;margin:26px 0">
+            <span style="display:inline-block;font-size:34px;font-weight:bold;letter-spacing:10px;background:#ecfdf3;color:#0f3524;padding:14px 22px;border-radius:10px;border:1px solid #bbf7d0">{{ codigo }}</span>
+        </p>
+        <p>El código vence en {{ minutos }} minutos.</p>
+        <p style="font-size:12px;color:#64748b">Si no creaste esta cuenta, ignora este mensaje.</p>
+    </div>
+</div>

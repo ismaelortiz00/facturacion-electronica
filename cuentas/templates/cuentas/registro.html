@@ -1,0 +1,50 @@
+{% extends 'cuentas/base.html' %}
+{% block titulo %}Crear cuenta{% endblock %}
+{% block encabezado %}Crear cuenta{% endblock %}
+{% block subtitulo %}Tu cédula y tu correo serán verificados{% endblock %}
+
+{% block contenido %}
+<div class="mensaje" id="mensaje" role="alert" hidden></div>
+
+<div id="pasoFormulario">
+<form id="formRegistro" action="{% url 'procesar_registro' %}" method="post" data-ajax data-limpiar data-paso-codigo novalidate>
+    {% csrf_token %}
+    <label for="cedula">Número de cédula</label>
+    <input type="text" id="cedula" name="cedula" inputmode="numeric" maxlength="10"
+           placeholder="10 dígitos" required data-cedula>
+    <small class="ayuda" id="ayudaCedula"></small>
+
+    <label for="nombres">Nombres y apellidos</label>
+    <input type="text" id="nombres" name="nombres" maxlength="120" autocomplete="name" required>
+
+    <label for="correo">Correo electrónico</label>
+    <input type="email" id="correo" name="correo" maxlength="150" autocomplete="email" required>
+
+    <label for="clave">Contraseña</label>
+    <div class="campo-clave">
+        <input type="password" id="clave" name="clave" maxlength="128" autocomplete="new-password" required data-fuerza>
+        <button type="button" class="ver-clave" data-ver="clave" aria-label="Mostrar contraseña">Ver</button>
+    </div>
+    <ul class="requisitos" id="requisitos">
+        <li data-regla="largo">Mínimo 8 caracteres</li>
+        <li data-regla="mayus">Una mayúscula</li>
+        <li data-regla="minus">Una minúscula</li>
+        <li data-regla="numero">Un número</li>
+        <li data-regla="simbolo">Un símbolo</li>
+    </ul>
+
+    <label for="confirmar">Confirmar contraseña</label>
+    <input type="password" id="confirmar" name="confirmar" maxlength="128" autocomplete="new-password" required>
+
+    {% include 'cuentas/_captcha.html' %}
+
+    <button type="submit" class="btn btn-principal">Registrarme</button>
+</form>
+
+<nav class="enlaces">
+    <a href="{% url 'login' %}">Ya tengo cuenta</a>
+</nav>
+</div>
+
+{% include 'cuentas/_paso_codigo.html' %}
+{% endblock %}

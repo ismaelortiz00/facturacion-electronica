@@ -1,0 +1,25 @@
+{% extends 'facturacion/base.html' %}
+{% block titulo %}Registrar cobro{% endblock %}
+{% block contenido %}
+<div class="cabecera"><div><h1>Registrar cobro</h1><p class="sub">Elige el cliente: aparecen sus facturas pendientes con lo que debe. Ajusta el valor si paga una parte.</p></div></div>
+<form method="post" class="tarjeta-panel formulario" id="formCobro" data-pendientes="{% url 'facturacion:pendientes' %}">
+    {% csrf_token %}
+    <div class="rejilla-2">
+        <label>Cliente
+            <select name="cliente_id" class="entrada" required data-buscar>
+                <option value="">Elige el cliente…</option>
+                {% for c in clientes %}<option value="{{ c.pk }}" {% if cliente_inicial == c.pk|stringformat:'s' %}selected{% endif %}>{{ c.nombre }} · debe {{ c.saldo|floatformat:'2u' }}</option>{% endfor %}
+            </select>
+            {% if not clientes %}<small class="tenue">Nadie tiene facturas a crédito pendientes.</small>{% endif %}</label>
+        <label>Fecha <input type="date" name="fecha" class="entrada" required value="{{ hoy|date:'Y-m-d' }}"></label>
+        <label>Forma de cobro <select name="forma" class="entrada">{% for v, t in formas %}<option value="{{ v }}">{{ t }}</option>{% endfor %}</select></label>
+        <label>Referencia (n.º de transferencia, voucher…) <input name="referencia" class="entrada" maxlength="80" autocomplete="off"></label>
+    </div>
+    <table class="tabla tabla-lineas">
+        <thead><tr><th>Factura</th><th>Fecha</th><th>Vence</th><th class="num">Debe</th><th class="num">Cobrar ahora</th></tr></thead>
+        <tbody><tr><td colspan="5" class="vacio">Elige el cliente.</td></tr></tbody>
+        <tfoot><tr><td colspan="4" class="num fuerte">Total del cobro</td><td class="num fuerte total-grande" data-total-cobro>0.00</td></tr></tfoot>
+    </table>
+    <div class="acciones"><a href="{% url 'facturacion:cobros' %}" class="btn btn-secundario">Cancelar</a><button class="btn btn-verde">Registrar cobro</button></div>
+</form>
+{% endblock %}

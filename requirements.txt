@@ -1,0 +1,13 @@
+Django>=5.2,<6.0       # framework web (versión LTS)
+argon2-cffi>=23.1      # encriptación de contraseñas con Argon2
+dnspython>=2.6         # comprobar que el dominio del correo recibe correos (MX)
+python-dotenv>=1.0     # leer las claves del archivo .env
+openpyxl>=3.1          # exportar reportes a Excel
+lxml>=5.0              # XML de los comprobantes electrónicos del SRI
+cryptography>=42       # firma XAdES-BES con el archivo .p12 y clave cifrada
+reportlab>=4.0         # RIDE en PDF con código de barras
+anthropic>=0.40        # asistente de IA (Claude)
+
+# Elige el conector de tu base de datos (sqlite no necesita nada):
+# psycopg[binary]>=3.2   # PostgreSQL
+# mssql-django>=1.5      # SQL Server (requiere ODBC Driver 18 for SQL Server)

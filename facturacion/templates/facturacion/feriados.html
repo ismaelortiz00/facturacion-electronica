@@ -1,0 +1,46 @@
+{% extends 'facturacion/base.html' %}
+{% load formato %}
+{% block titulo %}Feriados e IVA{% endblock %}
+{% block contenido %}
+<div class="cabecera"><div>
+    <h1>Feriados e IVA</h1>
+    <p class="sub">Cuando el Gobierno decreta IVA reducido para un feriado, regístralo aquí una sola vez: desde ese día, toda factura de servicios turísticos usa la tarifa del decreto sin que nadie cambie nada.</p>
+</div></div>
+<div class="aviso-iva {% if estado.decreto %}feriado{% endif %}">
+    {% if estado.decreto %}Hoy {{ hoy|date:'d/m/Y' }} rige {{ estado.decreto.feriado }} ({{ estado.decreto.decreto }}): servicios turísticos al <strong>{{ estado.decreto.porcentaje|pct }} %</strong>, el resto al {{ estado.general|pct }} %.
+    {% else %}Hoy {{ hoy|date:'d/m/Y' }} no hay feriado con decreto: IVA <strong>{{ estado.general|pct }} %</strong>.{% if estado.proximo %} El próximo es {{ estado.proximo.feriado }}, desde el {{ estado.proximo.desde|date:'d/m/Y' }} (falta{{ estado.dias_para_proximo|pluralize:'n' }} {{ estado.dias_para_proximo }} día{{ estado.dias_para_proximo|pluralize }}).{% endif %}{% endif %}
+</div>
+<section class="tarjeta-panel sin-relleno">
+    <h2 class="relleno-titulo">Decretos de IVA reducido para turismo</h2>
+    <table class="tabla">
+        <thead><tr><th>Feriado</th><th>Decreto</th><th>Desde</th><th>Hasta</th><th class="num">IVA turístico</th><th>Estado</th><th></th></tr></thead>
+        <tbody>
+        {% for d in decretos %}
+            <tr><td>{{ d.feriado }}</td><td>{{ d.decreto }}{% if d.registro_oficial %}<small class="tenue bloque">{{ d.registro_oficial }}</small>{% endif %}</td>
+                <td>{{ d.desde|date:'d/m/Y' }}</td><td>{{ d.hasta|date:'d/m/Y' }}</td><td class="num iva-reducido">{{ d.porcentaje|pct }} %</td>
+                <td>{% if d.desde <= hoy and d.hasta >= hoy %}<span class="etiqueta etiqueta-feriado">vigente hoy</span>{% elif d.desde > hoy %}<span class="etiqueta etiqueta-verde">próximo</span>{% else %}<span class="etiqueta etiqueta-gris">pasado</span>{% endif %}</td>
+                <td class="num">{% if empleado.es_admin and d.desde > hoy %}<form method="post" class="en-linea" data-confirmar="¿Borrar el decreto de {{ d.feriado }}?">{% csrf_token %}<input type="hidden" name="id" value="{{ d.pk }}"><button name="accion" value="borrar" class="quitar" title="Borrar">×</button></form>{% endif %}</td></tr>
+        {% empty %}<tr><td colspan="7" class="vacio">No hay decretos registrados.</td></tr>{% endfor %}
+        </tbody>
+    </table>
+</section>
+{% if empleado.es_admin %}
+<div class="tarjetas-dos">
+    <form method="post" class="tarjeta-panel formulario" novalidate>{% csrf_token %}
+        <h2>Registrar un decreto nuevo</h2>
+        {% for c in dform %}<label>{{ c.label|capfirst }} {{ c }}{% if c.help_text %}<small class="tenue">{{ c.help_text }}</small>{% endif %}{% for e in c.errors %}<small class="error-campo">{{ e }}</small>{% endfor %}</label>{% endfor %}
+        {% if dform.non_field_errors %}<div class="mensaje error">{{ dform.non_field_errors|join:' ' }}</div>{% endif %}
+        <div class="acciones"><button name="accion" value="decreto" class="btn btn-verde">Registrar decreto</button></div>
+    </form>
+    <section class="tarjeta-panel">
+        <h2>Tarifa general de IVA</h2>
+        <table class="tabla tabla-compacta"><tbody>{% for t in tasas %}<tr><td>Desde {{ t.desde|date:'d/m/Y' }}</td><td class="num">{{ t.porcentaje|pct }} %</td><td class="tenue">{{ t.base_legal }}</td></tr>{% endfor %}</tbody></table>
+        <form method="post" class="formulario" novalidate>{% csrf_token %}
+            <p class="tenue">Solo si la ley cambia la tarifa general (por ejemplo, del 15 % a otro valor).</p>
+            {% for c in tform %}<label>{{ c.label|capfirst }} {{ c }}{% for e in c.errors %}<small class="error-campo">{{ e }}</small>{% endfor %}</label>{% endfor %}
+            <div class="acciones"><button name="accion" value="tasa" class="btn btn-secundario">Agregar tarifa</button></div>
+        </form>
+    </section>
+</div>
+{% endif %}
+{% endblock %}

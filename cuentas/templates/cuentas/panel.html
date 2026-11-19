@@ -1,0 +1,28 @@
+{% extends 'cuentas/base.html' %}
+{% load static %}
+{% block titulo %}Panel{% endblock %}
+
+{% block cuerpo %}
+<header class="barra">
+    <span class="barra-marca"><img class="logo-img logo-img-chico" src="{% static 'img/logo.svg' %}" alt="IK"> Facturación Turística IK</span>
+    <form action="{% url 'salir' %}" method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-secundario">Cerrar sesión</button>
+    </form>
+</header>
+
+<main class="panel-escena">
+    <section class="panel">
+        <h1>Hola, {{ user.nombres }}</h1>
+        <p class="nota">Cédula {{ user.cedula_oculta }} · {{ user.correo }}</p>
+
+        <div class="modulos">
+            <button type="button" class="btn modulo"><strong>Plan de cuentas</strong><small>Catálogo contable de la empresa.</small></button>
+            <button type="button" class="btn modulo"><strong>Asientos contables</strong><small>Registro de movimientos diarios.</small></button>
+            <button type="button" class="btn modulo"><strong>Libro mayor</strong><small>Saldos por cuenta.</small></button>
+            <button type="button" class="btn modulo"><strong>Reportes</strong><small>Balance general y estado de resultados.</small></button>
+        </div>
+        <p class="nota">La sesión se cierra sola tras {{ minutos_sesion }} minutos sin actividad.</p>
+    </section>
+</main>
+{% endblock %}

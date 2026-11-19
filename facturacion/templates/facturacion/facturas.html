@@ -1,0 +1,35 @@
+{% extends 'facturacion/base.html' %}
+{% load formato %}
+{% block titulo %}Facturas{% endblock %}
+{% block contenido %}
+<div class="cabecera">
+    <div><h1>Facturas y notas de crédito</h1><p class="sub">Una factura emitida no se edita: se corrige o se anula, y queda constancia.</p></div>
+    <a href="{% url 'facturacion:factura_nueva' %}" class="btn btn-verde">+ Nueva factura</a>
+</div>
+{% if borradores and estado != 'borrador' %}<div class="mensaje aviso">Tienes {{ borradores }} borrador(es) sin emitir. <a class="enlace" href="?estado=borrador&desde=2000-01-01">Verlos</a></div>{% endif %}
+<form method="get" class="filtros">
+    <label>Desde <input type="date" name="desde" value="{{ desde|date:'Y-m-d' }}" class="entrada"></label>
+    <label>Hasta <input type="date" name="hasta" value="{{ hasta|date:'Y-m-d' }}" class="entrada"></label>
+    <select name="tipo" class="entrada"><option value="">Facturas y notas</option><option value="factura" {% if tipo == 'factura' %}selected{% endif %}>Solo facturas</option><option value="nota_credito" {% if tipo == 'nota_credito' %}selected{% endif %}>Solo notas de crédito</option></select>
+    <select name="estado" class="entrada"><option value="">Todos los estados</option><option value="borrador" {% if estado == 'borrador' %}selected{% endif %}>Borrador</option><option value="emitido" {% if estado == 'emitido' %}selected{% endif %}>Emitida</option><option value="anulado" {% if estado == 'anulado' %}selected{% endif %}>Anulada</option></select>
+    <input type="search" name="q" value="{{ q }}" placeholder="Cliente o cédula" class="entrada">
+    <button class="btn btn-verde">Ver</button>
+</form>
+<section class="tarjeta-panel sin-relleno">
+<table class="tabla">
+    <thead><tr><th>Número</th><th>Fecha</th><th>Cliente</th><th>IVA</th><th>Estado</th><th>SRI</th><th class="num">Total</th></tr></thead>
+    <tbody>
+    {% for c in facturas %}
+        <tr data-href="{% url 'facturacion:factura' c.pk %}">
+            <td class="mono">{% if c.tipo == 'nota_credito' %}NC {% endif %}{{ c.numero|default:'borrador' }}</td>
+            <td>{{ c.fecha|date:'d/m/Y' }}</td><td class="cortar">{{ c.cliente.nombre }}</td>
+            <td>{% if c.decreto %}<span class="etiqueta etiqueta-feriado" title="{{ c.decreto.feriado }}">{{ c.decreto.porcentaje|pct }} % feriado</span>{% elif c.iva %}<span class="etiqueta etiqueta-verde">general</span>{% else %}<span class="etiqueta etiqueta-gris">0 %</span>{% endif %}</td>
+            <td><span class="etiqueta {% if c.estado == 'emitido' %}etiqueta-verde{% elif c.estado == 'anulado' %}etiqueta-roja{% else %}etiqueta-ambar{% endif %}">{{ c.get_estado_display }}</span></td>
+            <td>{% if c.electronico %}<span class="etiqueta {% if c.electronico.estado == 'autorizado' %}etiqueta-verde{% elif c.electronico.estado == 'devuelto' or c.electronico.estado == 'no_autorizado' %}etiqueta-roja{% else %}etiqueta-ambar{% endif %}">{{ c.electronico.get_estado_display }}</span>{% elif c.estado == 'emitido' %}<span class="tenue">sin enviar</span>{% endif %}</td>
+            <td class="num">{% if c.tipo == 'nota_credito' %}-{% endif %}{{ c.total|dinero0 }}</td>
+        </tr>
+    {% empty %}<tr><td colspan="7" class="vacio">No hay documentos en ese rango.</td></tr>{% endfor %}
+    </tbody>
+</table>
+</section>
+{% endblock %}

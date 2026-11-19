@@ -1,0 +1,27 @@
+{% extends 'facturacion/base.html' %}
+{% load formato %}
+{% block titulo %}IVA a declarar{% endblock %}
+{% block contenido %}
+<div class="cabecera"><div><h1>IVA a declarar · {{ mes_nombre }} {{ anio }}</h1>
+    <p class="sub">Resumen de ventas por tarifa para la declaración mensual de IVA. Las notas de crédito ya están restadas.</p></div></div>
+<form method="get" class="filtros">
+    <select name="mes" class="entrada">{% for n, nombre in meses %}<option value="{{ n }}" {% if n == mes %}selected{% endif %}>{{ nombre|capfirst }}</option>{% endfor %}</select>
+    <select name="anio" class="entrada">{% for a in anios %}<option value="{{ a }}" {% if a == anio %}selected{% endif %}>{{ a }}</option>{% endfor %}</select>
+    <button class="btn btn-verde">Ver</button>
+</form>
+<section class="tarjeta-panel sin-relleno">
+<table class="tabla">
+    <thead><tr><th>Concepto</th><th class="num">Base imponible</th><th class="num">IVA</th></tr></thead>
+    <tbody>
+        <tr><td>Ventas con tarifa general</td><td class="num">{{ r.neto.general|dinero0 }}</td><td class="num">{{ r.iva_general|dinero0 }}</td></tr>
+        <tr><td class="iva-reducido">Ventas de servicios turísticos con IVA reducido (feriados)</td><td class="num">{{ r.neto.reducida|dinero0 }}</td><td class="num">{{ r.iva_reducida|dinero0 }}</td></tr>
+        <tr><td>Ventas con tarifa 0 %, exentas o no objeto</td><td class="num">{{ r.neto.cero|dinero0 }}</td><td class="num">0.00</td></tr>
+    </tbody>
+    <tfoot>
+        <tr><td class="fuerte">Total</td><td class="num fuerte">{% total_bases r %}</td><td class="num fuerte total-grande">{{ r.neto.iva|dinero0 }}</td></tr>
+        <tr><td class="tenue" colspan="3">Incluye {{ r.facturas.cantidad }} factura{{ r.facturas.cantidad|pluralize }} por {{ r.facturas.total|dinero0 }} y {{ r.notas.cantidad }} nota{{ r.notas.cantidad|pluralize }} de crédito por {{ r.notas.total|dinero0 }}.</td></tr>
+    </tfoot>
+</table>
+</section>
+<p class="nota-izq">Este es el IVA cobrado en ventas. El valor a pagar al SRI lo calcula el contador restando el crédito tributario de las compras y las retenciones.</p>
+{% endblock %}

@@ -1,0 +1,22 @@
+{% extends 'facturacion/base.html' %}
+{% block titulo %}Usuarios{% endblock %}
+{% block contenido %}
+<div class="cabecera"><div><h1>Usuarios</h1><p class="sub">Cada empleado se registra en la página de inicio con su cédula. Aquí lo habilitas y eliges su rol. El vendedor factura y cobra; el administrador además anula, configura y ve la bitácora.</p></div></div>
+<section class="tarjeta-panel sin-relleno">
+<table class="tabla">
+    <thead><tr><th>Nombre</th><th>Cédula</th><th>Correo</th><th>Rol</th><th>Habilitado</th><th></th></tr></thead>
+    <tbody>
+    {% for e in empleados %}
+        <tr class="{% if not e.activo %}fila-inactiva{% endif %}">
+            <td>{{ e.usuario.nombres }}{% if not e.activo %} <span class="etiqueta etiqueta-ambar">espera aprobación</span>{% endif %}</td><td class="mono">{{ e.usuario.cedula }}</td><td>{{ e.usuario.correo }}</td>
+            <td colspan="3">{% if e.usuario == user %}<span class="tenue">{{ e.get_rol_display }} (tú)</span>{% else %}
+                <form method="post" class="en-linea">{% csrf_token %}<input type="hidden" name="id" value="{{ e.pk }}">
+                    <select name="rol" class="entrada entrada-chica">{% for v, t in roles %}<option value="{{ v }}" {% if e.rol == v %}selected{% endif %}>{{ t }}</option>{% endfor %}</select>
+                    <label class="casilla"><input type="checkbox" name="activo" {% if e.activo %}checked{% endif %}> habilitado</label>
+                    <button class="btn btn-verde btn-chico">Guardar</button></form>{% endif %}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+</section>
+{% endblock %}
